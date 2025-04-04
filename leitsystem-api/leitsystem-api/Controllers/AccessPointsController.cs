@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using leitsystem_api.Data;
+using leitsystem_api.ModelsDTO;
 using leitsystem_api.Models;
+using leitsystem_api.ModelsDTO;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace leitsystem_api.Controllers
 {
-    public class AccessPointsController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AccessPointsController : ControllerBase
     {
         private readonly DataContext _context;
 
@@ -19,134 +21,163 @@ namespace leitsystem_api.Controllers
             _context = context;
         }
 
-        // GET: AccessPoints
-        public async Task<IActionResult> Index()
+        // GET: api/AccessPoints
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<AccessPointDto>>> GetAccessPoints()
         {
-            return View(await _context.AccessPoints.ToListAsync());
+            var accessPoints = await _context.AccessPoints.ToListAsync();
+            var dtos = accessPoints.Select(a => new AccessPointDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                MAC = a.MAC,
+                IPAddress = a.IPAddress,
+                Description = a.Description,
+                ConnectedDevices = a.ConnectedDevices,
+                Group = a.Group,
+                Status = a.Status,
+                Model = a.Model,
+                SWVersion = a.SWVersion,
+                Channel = a.Channel,
+                Band = a.Band,
+                Uptime = a.Uptime
+            }).ToList();
+
+            return dtos;
         }
 
-        // GET: AccessPoints/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/AccessPoints/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AccessPointDto>> GetAccessPoint(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var accessPoint = await _context.AccessPoints
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (accessPoint == null)
-            {
-                return NotFound();
-            }
-
-            return View(accessPoint);
-        }
-
-        // GET: AccessPoints/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: AccessPoints/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,MAC,IPAddress,Description,ConnectedDevices,Group,Status,Model,SWVersion,Channel,Band,Uptime")] AccessPoint accessPoint)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(accessPoint);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(accessPoint);
-        }
-
-        // GET: AccessPoints/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var accessPoint = await _context.AccessPoints.FindAsync(id);
             if (accessPoint == null)
             {
                 return NotFound();
             }
-            return View(accessPoint);
+
+            var dto = new AccessPointDto
+            {
+                Id = accessPoint.Id,
+                Name = accessPoint.Name,
+                MAC = accessPoint.MAC,
+                IPAddress = accessPoint.IPAddress,
+                Description = accessPoint.Description,
+                ConnectedDevices = accessPoint.ConnectedDevices,
+                Group = accessPoint.Group,
+                Status = accessPoint.Status,
+                Model = accessPoint.Model,
+                SWVersion = accessPoint.SWVersion,
+                Channel = accessPoint.Channel,
+                Band = accessPoint.Band,
+                Uptime = accessPoint.Uptime
+            };
+
+            return dto;
         }
 
-        // POST: AccessPoints/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: api/AccessPoints
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,MAC,IPAddress,Description,ConnectedDevices,Group,Status,Model,SWVersion,Channel,Band,Uptime")] AccessPoint accessPoint)
+        public async Task<ActionResult<AccessPointDto>> CreateAccessPoint(AccessPointCreateDTO dto)
         {
-            if (id != accessPoint.Id)
+            var accessPoint = new AccessPoint
             {
-                return NotFound();
-            }
+                Name = dto.Name,
+                MAC = dto.MAC,
+                IPAddress = dto.IPAddress,
+                Description = dto.Description,
+                ConnectedDevices = dto.ConnectedDevices,
+                Group = dto.Group,
+                Status = dto.Status,
+                Model = dto.Model,
+                SWVersion = dto.SWVersion,
+                Channel = dto.Channel,
+                Band = dto.Band,
+                Uptime = dto.Uptime
+            };
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(accessPoint);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AccessPointExists(accessPoint.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(accessPoint);
-        }
-
-        // GET: AccessPoints/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var accessPoint = await _context.AccessPoints
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (accessPoint == null)
-            {
-                return NotFound();
-            }
-
-            return View(accessPoint);
-        }
-
-        // POST: AccessPoints/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var accessPoint = await _context.AccessPoints.FindAsync(id);
-            if (accessPoint != null)
-            {
-                _context.AccessPoints.Remove(accessPoint);
-            }
-
+            _context.AccessPoints.Add(accessPoint);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            var resultDto = new AccessPointDto
+            {
+                Id = accessPoint.Id,
+                Name = accessPoint.Name,
+                MAC = accessPoint.MAC,
+                IPAddress = accessPoint.IPAddress,
+                Description = accessPoint.Description,
+                ConnectedDevices = accessPoint.ConnectedDevices,
+                Group = accessPoint.Group,
+                Status = accessPoint.Status,
+                Model = accessPoint.Model,
+                SWVersion = accessPoint.SWVersion,
+                Channel = accessPoint.Channel,
+                Band = accessPoint.Band,
+                Uptime = accessPoint.Uptime
+            };
+
+            return CreatedAtAction(nameof(GetAccessPoint), new { id = accessPoint.Id }, resultDto);
+        }
+
+        // PUT: api/AccessPoints/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAccessPoint(int id, AccessPointUpdateDTO dto)
+        {
+            var accessPoint = await _context.AccessPoints.FindAsync(id);
+            if (accessPoint == null)
+            {
+                return NotFound();
+            }
+
+            // Update properties
+            accessPoint.Name = dto.Name;
+            accessPoint.MAC = dto.MAC;
+            accessPoint.IPAddress = dto.IPAddress;
+            accessPoint.Description = dto.Description;
+            accessPoint.ConnectedDevices = dto.ConnectedDevices;
+            accessPoint.Group = dto.Group;
+            accessPoint.Status = dto.Status;
+            accessPoint.Model = dto.Model;
+            accessPoint.SWVersion = dto.SWVersion;
+            accessPoint.Channel = dto.Channel;
+            accessPoint.Band = dto.Band;
+            accessPoint.Uptime = dto.Uptime;
+
+            _context.Entry(accessPoint).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AccessPointExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/AccessPoints/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAccessPoint(int id)
+        {
+            var accessPoint = await _context.AccessPoints.FindAsync(id);
+            if (accessPoint == null)
+            {
+                return NotFound();
+            }
+
+            _context.AccessPoints.Remove(accessPoint);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         private bool AccessPointExists(int id)
