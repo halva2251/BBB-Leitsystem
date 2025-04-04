@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using leitsystem_api.Data;
 using leitsystem_api.Models;
+using leitsystem_api.ModelsDTO;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace leitsystem_api.Controllers
 {
-    public class FloorsController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class FloorsController : ControllerBase
     {
         private readonly DataContext _context;
 
@@ -19,146 +20,122 @@ namespace leitsystem_api.Controllers
             _context = context;
         }
 
-        // GET: Floors
-        public async Task<IActionResult> Index()
+        // GET: api/Floors
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<FloorDTO>>> GetFloors()
         {
-            var dataContext = _context.Floors.Include(f => f.Building);
-            return View(await dataContext.ToListAsync());
+            var floors = await _context.Floors.ToListAsync();
+            var floorDTOs = floors.Select(f => new FloorDTO
+            {
+                Id = f.Id,
+                BuildingId = f.BuildingId,
+                Name = f.Name,
+                Description = f.Description
+            }).ToList();
+
+            return floorDTOs;
         }
 
-        // GET: Floors/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/Floors/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<FloorDTO>> GetFloor(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var floor = await _context.Floors
-                .Include(f => f.Building)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (floor == null)
-            {
-                return NotFound();
-            }
-
-            return View(floor);
-        }
-
-        // GET: Floors/Create
-        public IActionResult Create()
-        {
-            ViewData["BuildingId"] = new SelectList(_context.Buildings, "Id", "Id");
-            return View();
-        }
-
-        // POST: Floors/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BuildingId,Name,Description")] Floor floor)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(floor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BuildingId"] = new SelectList(_context.Buildings, "Id", "Id", floor.BuildingId);
-            return View(floor);
-        }
-
-        // GET: Floors/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var floor = await _context.Floors.FindAsync(id);
             if (floor == null)
             {
                 return NotFound();
             }
-            ViewData["BuildingId"] = new SelectList(_context.Buildings, "Id", "Id", floor.BuildingId);
-            return View(floor);
+
+            var floorDTO = new FloorDTO
+            {
+                Id = floor.Id,
+                BuildingId = floor.BuildingId,
+                Name = floor.Name,
+                Description = floor.Description
+            };
+
+            return floorDTO;
         }
 
-        // POST: Floors/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: api/Floors
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BuildingId,Name,Description")] Floor floor)
+        public async Task<ActionResult<FloorDTO>> CreateFloor(FloorCreateDTO dto)
         {
-            if (id != floor.Id)
+            var floor = new Floor
             {
-                return NotFound();
-            }
+                BuildingId = dto.BuildingId,
+                Name = dto.Name,
+                Description = dto.Description
+            };
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(floor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FloorExists(floor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["BuildingId"] = new SelectList(_context.Buildings, "Id", "Id", floor.BuildingId);
-            return View(floor);
-        }
-
-        // GET: Floors/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var floor = await _context.Floors
-                .Include(f => f.Building)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (floor == null)
-            {
-                return NotFound();
-            }
-
-            return View(floor);
-        }
-
-        // POST: Floors/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var floor = await _context.Floors.FindAsync(id);
-            if (floor != null)
-            {
-                _context.Floors.Remove(floor);
-            }
-
+            _context.Floors.Add(floor);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            var floorDTO = new FloorDTO
+            {
+                Id = floor.Id,
+                BuildingId = floor.BuildingId,
+                Name = floor.Name,
+                Description = floor.Description
+            };
+
+            return CreatedAtAction(nameof(GetFloor), new { id = floor.Id }, floorDTO);
+        }
+
+        // PUT: api/Floors/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateFloor(int id, FloorUpdateDTO dto)
+        {
+            var floor = await _context.Floors.FindAsync(id);
+            if (floor == null)
+            {
+                return NotFound();
+            }
+
+            floor.BuildingId = dto.BuildingId;
+            floor.Name = dto.Name;
+            floor.Description = dto.Description;
+
+            _context.Entry(floor).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!FloorExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/Floors/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFloor(int id)
+        {
+            var floor = await _context.Floors.FindAsync(id);
+            if (floor == null)
+            {
+                return NotFound();
+            }
+
+            _context.Floors.Remove(floor);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         private bool FloorExists(int id)
         {
-            return _context.Floors.Any(e => e.Id == id);
+            return _context.Floors.Any(f => f.Id == id);
         }
     }
 }
