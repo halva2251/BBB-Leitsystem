@@ -1,0 +1,51 @@
+# =============================
+# ASP.NET / Visual Studio
+# =============================
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio folders
+.vs/
+.vscode/
+
+# ASP.NET Core specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# =============================
+# Node.js / React
+# =============================
+
+# Dependency directories
+node_modules/
+
+# React build output (e.g., Create React App)
+build/
+dist/
+.cache/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (if not needed in version control)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
