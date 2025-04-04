@@ -23,8 +23,8 @@ namespace leitsystem_api.Controllers
             _context = context;
             _configuration = configuration;
         }
-        /*
-        [HttpPost("/register")]
+        
+        /*[HttpPost("/register")]
         public IActionResult Registration([FromBody] RegisterDTO data)
         {
             // Validate input
@@ -49,6 +49,7 @@ namespace leitsystem_api.Controllers
             var newUser = new User
             {
                 Username = data.Username,
+                Email = data.Email,
                 PasswordHash = passwordHash,
             };
 
