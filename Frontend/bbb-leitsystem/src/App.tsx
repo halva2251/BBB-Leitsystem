@@ -721,21 +721,44 @@ const FullscreenFloorplan: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-screen h-screen bg-gray-900 flex flex-col items-center justify-center">
-      <div className="text-white text-4xl mb-4">
-        {selectedBuilding} – {currentFloor}
+    <div className="w-screen h-screen flex flex-col" style={{ backgroundColor: "#1E1E1E" }}>
+      {/* Fixierter Header mit der Hintergrundfarbe */}
+      <header className="fixed top-0 left-0 w-full h-20 z-50 flex items-center justify-center" style={{ backgroundColor: "#1E1E1E" }}>
+        {/* Optional: Header-Inhalt */}
+      </header>
+
+      {/* Hauptbereich: Abstand vom Header (pt-20) */}
+      <div className="flex flex-col flex-1 pt-40 items-center justify-center" style={{ backgroundColor: "#1E1E1E" }}>
+        {/* Text zwischen Header und Bild */}
+        <div className="text-white text-4xl mb-4">
+          {selectedBuilding} – {currentFloor}
+        </div>
+        <div className="mt-4 flex justify-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-green-500" />
+          <span className="text-base text-white-700">Wenig Auslastung</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-yellow-500" />
+          <span className="text-base text-white-700">Mässig Auslastung</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-red-500" />
+          <span className="text-base text-white-700">Hohe Auslastung</span>
+        </div>
       </div>
-      <div className="w-full h-full flex items-center justify-center">
-        <img 
-          src={selectedFile}
-          alt={`Floorplan ${currentFloor}`}
-          className="max-w-full max-h-full object-contain"
-        />
+        {/* Bildbereich */}
+        <div className="w-full flex-1 flex items-center justify-center">
+          <img 
+            src={selectedFile}
+            alt={`Floorplan ${currentFloor}`}
+            className="max-w-full max-h-full object-contain"
+          />
+        </div>
       </div>
     </div>
   );
 }
-
 // ---------------------
 // Main App Component mit Routing
 // ---------------------
