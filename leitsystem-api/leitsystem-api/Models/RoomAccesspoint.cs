@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace leitsystem_api.Models
 {
@@ -9,6 +10,7 @@ namespace leitsystem_api.Models
         public int AccesspointId { get; set; }
 
         // Navigation properties
+        [JsonIgnore]
         public virtual Room Room { get; set; }
         public virtual AccessPoint AccessPoint { get; set; }
     }

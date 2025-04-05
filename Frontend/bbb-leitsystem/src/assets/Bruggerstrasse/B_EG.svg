@@ -1,0 +1,23 @@
+<svg width="1970" height="500" viewBox="0 0 1970 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hintergrund -->
+  <rect width="1970" height="500" fill="#1E1E1E"/>
+  <rect x="100" width="1769" height="500" fill="#D9D9D9"/>
+
+  <!-- OBEN: Räume (y = 82.5) -->
+  <rect id="eg-Raum1" x="219.5" y="82.5" width="222" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum2" x="811.5" y="82.5" width="203" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum3" x="1425.5" y="82.5" width="369" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum4" x="1019.5" y="82.5" width="244" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum5" x="436.5" y="82.5" width="240" height="165" stroke="black" stroke-width="5"/>
+
+  <!-- UNTEN: Räume (y ≈ 252.5) -->
+  <rect id="eg-Raum6" x="760.5" y="252.5" width="431" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum7" x="1710.5" y="252.5" width="84" height="89" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum8" x="1347.5" y="252.5" width="358" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum9" x="400.5" y="252.5" width="222" height="165" stroke="black" stroke-width="5"/>
+  <rect id="eg-Raum10" x="169.5" y="252.5" width="226" height="165" stroke="black" stroke-width="5"/>
+
+  <!-- Weitere Gebäudeteile (keine Räume) -->
+  <rect x="1869" width="101" height="250" fill="#D9D9D9"/>
+  <rect y="352" width="100" height="148" fill="#D9D9D9"/>
+</svg>

@@ -1,12 +1,7 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace leitsystem_api.Models
+﻿namespace leitsystem_api.ModelsDTO
 {
-    public class AccessPoint
+    public class AccessPointUpdateDTO
     {
-        [Key]
-        public int Id { get; set; }
         public string Name { get; set; }
         public string MAC { get; set; }
         public string IPAddress { get; set; }
@@ -19,9 +14,5 @@ namespace leitsystem_api.Models
         public string Channel { get; set; }
         public string Band { get; set; }
         public string Uptime { get; set; }
-
-        // Many-to-many: an AccessPoint can be connected to multiple Rooms.
-        public virtual ICollection<RoomAccesspoint> RoomAccesspoints { get; set; } = new List<RoomAccesspoint>();
     }
 }
-

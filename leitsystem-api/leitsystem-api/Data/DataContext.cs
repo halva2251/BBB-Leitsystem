@@ -17,14 +17,15 @@ namespace leitsystem_api.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<AccessPoint> AccessPoints { get; set; }
         public DbSet<RoomAccesspoint> RoomAccesspoints { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure composite primary key for RoomAccesspoint
+            // Configure composite primary key for RoomAccesspoint.
             modelBuilder.Entity<RoomAccesspoint>()
                 .HasKey(ra => new { ra.RoomId, ra.AccesspointId });
 
-            // Configure many-to-many relationship between Room and AccessPoint through RoomAccesspoint
+            // Configure many-to-many relationship between Room and AccessPoint.
             modelBuilder.Entity<RoomAccesspoint>()
                 .HasOne(ra => ra.Room)
                 .WithMany(r => r.RoomAccesspoints)

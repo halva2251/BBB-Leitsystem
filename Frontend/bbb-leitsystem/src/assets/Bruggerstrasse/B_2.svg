@@ -1,0 +1,37 @@
+<svg width="1970" height="500" viewBox="0 0 1970 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hintergrund -->
+  <rect width="1970" height="500" fill="#1E1E1E"/>
+  <rect x="100" width="1769" height="500" fill="#D9D9D9"/>
+  
+  <!-- Räume (Stroke-Rechtecke) mit eindeutigen IDs -->
+  <!-- Obere Reihe -->
+  <rect id="og2-Raum1" x="445.5" y="82.5" width="231" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum3" x="219.5" y="82.5" width="222" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum4" x="811.5" y="82.5" width="222" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum5" x="1030.5" y="82.5" width="222" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum8" x="1652.5" y="82.5" width="154" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum9" x="1434.5" y="82.5" width="213" height="165" stroke="black" stroke-width="5"/>
+  
+  <!-- Untere Reihe -->
+  <rect id="og2-Raum2" x="391.5" y="252.5" width="210" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum6" x="169.5" y="252.5" width="222" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum7" x="1361.5" y="252.5" width="154" height="165" stroke="black" stroke-width="5"/>
+  <rect id="og2-Raum10" x="1520.5" y="252.5" width="185" height="165" stroke="black" stroke-width="5"/>
+  
+  <!-- Zusätzliche Elemente (keine Räume) -->
+  <!-- Diese beiden Rechtecke dienen als Gebäudeteile -->
+  <rect x="1869" width="101" height="250" fill="#D9D9D9"/>
+  <rect y="297" width="100" height="203" fill="#D9D9D9"/>
+  
+  <!-- Linien -->
+  <line x1="758" y1="247.5" x2="1073" y2="247.5" stroke="black" stroke-width="5"/>
+  
+  <!-- Nicht als Raum zählende Elemente -->
+  <!-- Kleineres Rechteck (wird nicht als Raum gezählt) -->
+  <rect x="1707.5" y="252.5" width="99" height="89" stroke="black" stroke-width="5"/>
+  <!-- Kleines Rechteck, ebenfalls kein Raum -->
+  <rect x="601.5" y="246.5" width="75" height="80" stroke="black" stroke-width="5"/>
+  
+  <!-- Ein weiteres Element, hier als Hintergrund/Areal, das kein Raum ist -->
+  <rect x="758" y="250" width="436" height="161" fill="#1E1E1E"/>
+</svg>
