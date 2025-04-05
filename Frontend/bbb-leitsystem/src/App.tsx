@@ -1,7 +1,8 @@
 // App.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate, Link } from 'react-router-dom';
 import { UncontrolledReactSVGPanZoom } from 'react-svg-pan-zoom';
+
 
 // ---------------------
 // Header Component
@@ -48,39 +49,28 @@ const Footer: React.FC = () => {
 };
 
 // ---------------------
-// LoginPage Component (ohne Header/Footer, full width & zentriert)
+// LoginPage Component (Dummy-Implementierung)
 // ---------------------
+const PrivateRoute: React.FC = () => {
+  const isAuthenticated = localStorage.getItem('auth') === 'true';
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+};
+
+// ----- LoginPage Component (Dummy-Implementierung) -----
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (response.ok) {
-        console.log("Login erfolgreich – Navigiere zum Admin Dashboard");
-        navigate('/admin');
-      } else {
-        console.error("Login fehlgeschlagen");
-      }
-    } catch (error) {
-      console.error("Fehler beim Login:", error);
-    }
+    // Hier wird der Login simuliert – im echten System würde hier die Authentifizierung erfolgen.
+    localStorage.setItem('auth', 'true');
+    navigate('/admin');
   };
 
   return (
-    // Verwende w-screen und h-screen, damit der Container die volle Breite/Höhe hat
-    <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50">
-      {/* Entferne max-w, damit das Formular die volle Breite einnimmt */}
+    <div className="min-h-screen w-full flex items-center justify-center pt-32 pb-20 bg-gradient-to-br from-white to-blue-50">
       <form
         onSubmit={handleLogin}
-        className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full"
+        className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-lg"
       >
         <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
         <div className="space-y-4">
@@ -88,8 +78,6 @@ const LoginPage: React.FC = () => {
             <label className="block text-base font-semibold text-gray-600">Email</label>
             <input
               type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
             />
           </div>
@@ -97,8 +85,6 @@ const LoginPage: React.FC = () => {
             <label className="block text-base font-semibold text-gray-600">Password</label>
             <input
               type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
             />
           </div>
@@ -114,234 +100,1102 @@ const LoginPage: React.FC = () => {
   );
 };
 
+
 // ---------------------
-// AdminDashboard Component (AccessPoint-Management)
+// AdminDashboard Component (dynamisches Accesspoint-Management)
 // ---------------------
-// Dieses Beispiel basiert auf dem Backend-Schema für AccessPointDto, AccessPointCreateDTO und AccessPointUpdateDTO
-interface AccessPoint {
+// ----- Schnittstellen basierend auf dem Schema -----
+// ----- Schnittstellen basierend auf dem Schema -----
+export interface AccessPointDto {
   id: number;
-  name: string | null;
-  mac: string | null;
-  ipAddress: string | null;
-  description: string | null;
+  name?: string;
+  mac?: string;
+  ipAddress?: string;
+  description?: string;
   connectedDevices: number;
-  group: string | null;
-  status: string | null;
-  model: string | null;
-  swVersion: string | null;
-  channel: string | null;
-  band: string | null;
-  uptime: string | null;
+  group?: string;
+  status?: string;
+  model?: string;
+  swVersion?: string;
+  channel?: string;
+  band?: string;
+  uptime?: string;
 }
 
-const AdminDashboard: React.FC = () => {
-  const [accessPoints, setAccessPoints] = useState<AccessPoint[]>([]);
-  const [selectedAP, setSelectedAP] = useState<AccessPoint | null>(null);
-  // Beispielhafte Felder zum Bearbeiten
-  const [editName, setEditName] = useState<string>('');
-  const [editIp, setEditIp] = useState<string>('');
-  const [editStatus, setEditStatus] = useState<string>('');
+export interface AccessPointCreateDTO {
+  name?: string;
+  mac?: string;
+  ipAddress?: string;
+  description?: string;
+  connectedDevices: number;
+  group?: string;
+  status?: string;
+  model?: string;
+  swVersion?: string;
+  channel?: string;
+  band?: string;
+  uptime?: string;
+}
 
-  // Beim Mounten die AccessPoints vom Backend laden
+export interface AccessPointUpdateDTO {
+  name?: string;
+  mac?: string;
+  ipAddress?: string;
+  description?: string;
+  connectedDevices: number;
+  group?: string;
+  status?: string;
+  model?: string;
+  swVersion?: string;
+  channel?: string;
+  band?: string;
+  uptime?: string;
+}
+
+export interface BuildingDTO {
+  id: number;
+  name?: string;
+  description?: string;
+}
+
+export interface BuildingCreateDTO {
+  name?: string;
+  description?: string;
+}
+
+export interface BuildingUpdateDTO {
+  name?: string;
+  description?: string;
+}
+
+export interface FloorDTO {
+  id: number;
+  buildingId: number;
+  name?: string;
+  description?: string;
+}
+
+export interface FloorCreateDTO {
+  buildingId: number;
+  name?: string;
+  description?: string;
+}
+
+export interface FloorUpdateDTO {
+  buildingId: number;
+  name?: string;
+  description?: string;
+}
+
+export interface RoomDTO {
+  id: number;
+  name?: string;
+  floorId: number;
+  floorName?: string;
+  capacity: number;
+  type?: string;
+  isActive: boolean;
+}
+
+export interface RoomCreateDTO {
+  name?: string;
+  floorId: number;
+  capacity: number;
+  type?: string;
+  isActive: boolean;
+}
+
+export interface RoomUpdateDTO {
+  name?: string;
+  floorId: number;
+  capacity: number;
+  type?: string;
+  isActive: boolean;
+}
+
+export interface RoomAccesspointDTO {
+  roomId: number;
+  accesspointId: number;
+}
+
+export interface RoomAccesspointCreateDTO {
+  roomId: number;
+  accesspointId: number;
+}
+
+// ----- Hilfsfunktion: API-Call -----
+async function api<T>(url: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    throw new Error(`API Error: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+// ----- AdminDashboard mit moderner, übersichtlicher UI -----
+// Es gibt Tabs für die einzelnen Module. Die Erfassung neuer Datensätze erfolgt
+// über integrierte Formulare, deren Daten per API in die Datenbank geschrieben werden.
+const AdminDashboard: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<
+    'accesspoints' | 'buildings' | 'floors' | 'rooms' | 'roomaccesspoints'
+  >('accesspoints');
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-green-50 text-gray-800">
+      <div className="container mx-auto p-8 pt-32">
+        <h1 className="text-5xl font-extrabold text-indigo-800 text-center mb-10">
+          Admin Dashboard
+        </h1>
+        <nav className="mb-10">
+          <ul className="flex justify-center gap-6">
+            {[
+              { id: 'accesspoints', label: 'Accesspoints' },
+              { id: 'buildings', label: 'Gebäude' },
+              { id: 'floors', label: 'Stockwerke' },
+              { id: 'rooms', label: 'Räume' },
+              { id: 'roomaccesspoints', label: 'Room-Accesspoints' },
+            ].map((tab) => (
+              <li key={tab.id}>
+                <button
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-6 py-3 rounded-full transition-all font-semibold shadow-md ${
+                    activeTab === tab.id
+                      ? 'bg-indigo-600 text-white transform scale-105'
+                      : 'bg-white text-gray-800 hover:bg-indigo-100'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="bg-white rounded-xl shadow-xl p-6">
+          {activeTab === 'accesspoints' && <AccessPointAdmin />}
+          {activeTab === 'buildings' && <BuildingAdmin />}
+          {activeTab === 'floors' && <FloorAdmin />}
+          {activeTab === 'rooms' && <RoomAdmin />}
+          {activeTab === 'roomaccesspoints' && <RoomAccessPointAdmin />}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ----- AccessPointAdmin Component -----
+const AccessPointAdmin: React.FC = () => {
+  const [accessPoints, setAccessPoints] = useState<AccessPointDto[]>([]);
+  const [selectedAP, setSelectedAP] = useState<AccessPointDto | null>(null);
+  const [editForm, setEditForm] = useState<AccessPointUpdateDTO>({ connectedDevices: 0 });
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [createForm, setCreateForm] = useState<AccessPointCreateDTO>({ connectedDevices: 0 });
+
   useEffect(() => {
-    fetch('http://localhost:5000/api/AccessPoints')
-      .then(response => response.json())
-      .then((data: AccessPoint[]) => {
+    api<AccessPointDto[]>('/api/AccessPoints')
+      .then((data) => {
         setAccessPoints(data);
-        if (data.length > 0) {
-          handleSelectAP(data[0]);
-        }
+        if (data.length) setSelectedAP(data[0]);
       })
-      .catch(error => console.error("Fehler beim Laden der AccessPoints:", error));
+      .catch((err) => console.error(err));
   }, []);
 
-  const handleSelectAP = (ap: AccessPoint) => {
+  useEffect(() => {
+    if (selectedAP) {
+      setEditForm({
+        name: selectedAP.name,
+        mac: selectedAP.mac,
+        ipAddress: selectedAP.ipAddress,
+        description: selectedAP.description,
+        connectedDevices: selectedAP.connectedDevices,
+        group: selectedAP.group,
+        status: selectedAP.status,
+        model: selectedAP.model,
+        swVersion: selectedAP.swVersion,
+        channel: selectedAP.channel,
+        band: selectedAP.band,
+        uptime: selectedAP.uptime,
+      });
+    }
+  }, [selectedAP]);
+
+  const handleSelectAP = (ap: AccessPointDto) => {
+    setIsCreating(false);
     setSelectedAP(ap);
-    setEditName(ap.name || '');
-    setEditIp(ap.ipAddress || '');
-    setEditStatus(ap.status || '');
   };
 
-  const handleAddAP = async () => {
-    // Beispielhafte Daten für einen neuen AccessPoint
-    const newAPData = {
-      name: "Neuer AccessPoint",
-      mac: "",
-      ipAddress: "",
-      description: "",
-      connectedDevices: 0,
-      group: "",
-      status: "inactive",
-      model: "",
-      swVersion: "",
-      channel: "",
-      band: "",
-      uptime: ""
-    };
+  const handleCreate = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/AccessPoints', {
+      const created = await api<AccessPointDto>('/api/AccessPoints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAPData)
+        body: JSON.stringify(createForm),
       });
-      if (response.ok) {
-        const createdAP: AccessPoint = await response.json();
-        const newList = [...accessPoints, createdAP];
-        setAccessPoints(newList);
-        handleSelectAP(createdAP);
-      } else {
-        console.error("Fehler beim Hinzufügen des AccessPoints");
-      }
-    } catch (error) {
-      console.error("Fehler beim Hinzufügen des AccessPoints:", error);
+      setAccessPoints([...accessPoints, created]);
+      setSelectedAP(created);
+      setIsCreating(false);
+      setCreateForm({ connectedDevices: 0 });
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleDeleteAP = async () => {
     if (!selectedAP) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/AccessPoints/${selectedAP.id}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) {
-        const filtered = accessPoints.filter(ap => ap.id !== selectedAP.id);
-        setAccessPoints(filtered);
-        if (filtered.length > 0) {
-          handleSelectAP(filtered[0]);
-        } else {
-          setSelectedAP(null);
-          setEditName('');
-          setEditIp('');
-          setEditStatus('');
-        }
-      } else {
-        console.error("Fehler beim Löschen des AccessPoints");
-      }
-    } catch (error) {
-      console.error("Fehler beim Löschen des AccessPoints:", error);
+      await api<void>(`/api/AccessPoints/${selectedAP.id}`, { method: 'DELETE' });
+      const filtered = accessPoints.filter((ap) => ap.id !== selectedAP.id);
+      setAccessPoints(filtered);
+      setSelectedAP(filtered[0] || null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleSaveChanges = async () => {
     if (!selectedAP) return;
-    const updatedAPData = {
-      name: editName,
-      mac: selectedAP.mac,
-      ipAddress: editIp,
-      description: selectedAP.description,
-      connectedDevices: selectedAP.connectedDevices,
-      group: selectedAP.group,
-      status: editStatus,
-      model: selectedAP.model,
-      swVersion: selectedAP.swVersion,
-      channel: selectedAP.channel,
-      band: selectedAP.band,
-      uptime: selectedAP.uptime,
-    };
     try {
-      const response = await fetch(`http://localhost:5000/api/AccessPoints/${selectedAP.id}`, {
+      await api<void>(`/api/AccessPoints/${selectedAP.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedAPData)
+        body: JSON.stringify(editForm),
       });
-      if (response.ok) {
-        const updatedList = accessPoints.map(ap =>
-          ap.id === selectedAP.id ? { ...ap, ...updatedAPData } : ap
-        );
-        setAccessPoints(updatedList);
-        setSelectedAP({ ...selectedAP, ...updatedAPData });
-      } else {
-        console.error("Fehler beim Aktualisieren des AccessPoints");
-      }
-    } catch (error) {
-      console.error("Fehler beim Aktualisieren des AccessPoints:", error);
+      const updatedList = accessPoints.map((ap) =>
+        ap.id === selectedAP.id ? ({ ...selectedAP, ...editForm } as AccessPointDto) : ap
+      );
+      setAccessPoints(updatedList);
+      setSelectedAP({ ...selectedAP, ...editForm } as AccessPointDto);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
-    <div className="min-h-screen w-full p-10 pt-32 pb-20 bg-gradient-to-br from-white via-blue-50 to-green-50 text-gray-800">
-      <h1 className="text-4xl font-extrabold mb-6 text-indigo-800">Admin Dashboard</h1>
-      <div className="flex gap-6">
-        {/* Linke Spalte: AccessPoint-Liste */}
-        <div className="w-1/3 bg-white p-6 shadow-lg rounded-lg flex flex-col">
-          <h2 className="text-2xl font-bold mb-4">AccessPoints</h2>
-          <div className="flex-1 overflow-y-auto space-y-2">
-            {accessPoints.map(ap => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Linke Spalte: Liste und Neuerfassung */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        <h2 className="text-2xl font-bold mb-4 border-b pb-2">Accesspoints</h2>
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+          {accessPoints.length === 0 ? (
+            <p className="text-gray-500">Keine Einträge vorhanden.</p>
+          ) : (
+            accessPoints.map((ap) => (
               <div
                 key={ap.id}
                 onClick={() => handleSelectAP(ap)}
-                className={`p-3 rounded-md cursor-pointer hover:bg-gray-100 ${selectedAP && selectedAP.id === ap.id ? 'bg-indigo-50' : ''}`}
+                className={`p-3 rounded-md cursor-pointer transition-colors ${
+                  selectedAP && selectedAP.id === ap.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                }`}
               >
                 <p className="font-semibold">{ap.name}</p>
-                <p className="text-sm text-gray-600">
-                  IP: {ap.ipAddress || 'Nicht gesetzt'} | Status: {ap.status || 'n/a'}
-                </p>
+                <p className="text-sm text-gray-600">ID: {ap.id}</p>
               </div>
-            ))}
-          </div>
-          <div className="mt-4 flex justify-between">
-            <button
-              onClick={handleAddAP}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
-            >
-              +
-            </button>
-            <button
-              onClick={handleDeleteAP}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
-              disabled={!selectedAP}
-            >
-              -
-            </button>
-          </div>
-        </div>
-        {/* Rechte Spalte: Detailansicht */}
-        <div className="w-2/3 bg-white p-6 shadow-lg rounded-lg">
-          {selectedAP ? (
-            <>
-              <h2 className="text-2xl font-bold mb-4">AccessPoint: {selectedAP.name}</h2>
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">Name</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2 text-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">IP Address</label>
-                  <input
-                    type="text"
-                    value={editIp}
-                    onChange={e => setEditIp(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2 text-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">Status</label>
-                  <input
-                    type="text"
-                    value={editStatus}
-                    onChange={e => setEditStatus(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2 text-base"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={handleSaveChanges}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-              >
-                Änderungen speichern
-              </button>
-            </>
-          ) : (
-            <p className="text-lg text-gray-600">
-              Wähle links einen AccessPoint oder füge einen neuen hinzu.
-            </p>
+            ))
           )}
         </div>
+        <div className="mt-4 flex justify-around">
+          <button
+            onClick={() => setIsCreating(!isCreating)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+          >
+            {isCreating ? 'Abbrechen' : 'Neuer Accesspoint'}
+          </button>
+          <button
+            onClick={handleDeleteAP}
+            className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
+            disabled={!selectedAP}
+          >
+            Löschen
+          </button>
+        </div>
+        {isCreating && (
+          <div className="mt-6 p-4 border rounded-lg">
+            <h3 className="font-bold mb-3">Neuen Accesspoint erstellen</h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Name"
+                value={createForm.name || ''}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="text"
+                placeholder="MAC"
+                value={createForm.mac || ''}
+                onChange={(e) => setCreateForm({ ...createForm, mac: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="text"
+                placeholder="IP Address"
+                value={createForm.ipAddress || ''}
+                onChange={(e) => setCreateForm({ ...createForm, ipAddress: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <textarea
+                placeholder="Beschreibung"
+                value={createForm.description || ''}
+                onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleCreate}
+                className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
+              >
+                Erstellen
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Rechte Spalte: Bearbeiten */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        {selectedAP ? (
+          <>
+            <h2 className="text-2xl font-bold mb-4 border-b pb-2">Accesspoint bearbeiten</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={editForm.name || ''}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="text"
+                placeholder="MAC"
+                value={editForm.mac || ''}
+                onChange={(e) => setEditForm({ ...editForm, mac: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="text"
+                placeholder="IP Address"
+                value={editForm.ipAddress || ''}
+                onChange={(e) => setEditForm({ ...editForm, ipAddress: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <textarea
+                placeholder="Beschreibung"
+                value={editForm.description || ''}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSaveChanges}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+              >
+                Speichern
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="text-gray-500 text-lg">Wähle einen Accesspoint zum Bearbeiten aus.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ----- BuildingAdmin Component -----
+const BuildingAdmin: React.FC = () => {
+  const [buildings, setBuildings] = useState<BuildingDTO[]>([]);
+  const [selectedBuilding, setSelectedBuilding] = useState<BuildingDTO | null>(null);
+  const [editForm, setEditForm] = useState<BuildingUpdateDTO>({});
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [createForm, setCreateForm] = useState<BuildingCreateDTO>({});
+
+  useEffect(() => {
+    api<BuildingDTO[]>('/api/Buildings')
+      .then((data) => {
+        // Nur die Gebäude "Bruggerstrasse" und "Martinsberg"
+        const filtered = data.filter(
+          (b) =>
+            b.name?.toLowerCase() === 'bruggerstrasse' ||
+            b.name?.toLowerCase() === 'martinsberg'
+        );
+        setBuildings(filtered);
+        if (filtered.length) setSelectedBuilding(filtered[0]);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (selectedBuilding) {
+      setEditForm({ name: selectedBuilding.name, description: selectedBuilding.description });
+    }
+  }, [selectedBuilding]);
+
+  const handleSelectBuilding = (b: BuildingDTO) => {
+    setIsCreating(false);
+    setSelectedBuilding(b);
+  };
+
+  const handleCreate = async () => {
+    try {
+      const created = await api<BuildingDTO>('/api/Buildings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm),
+      });
+      if (
+        created.name?.toLowerCase() === 'bruggerstrasse' ||
+        created.name?.toLowerCase() === 'martinsberg'
+      ) {
+        setBuildings([...buildings, created]);
+        setSelectedBuilding(created);
+        setIsCreating(false);
+        setCreateForm({});
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteBuilding = async () => {
+    if (!selectedBuilding) return;
+    try {
+      await api<void>(`/api/Buildings/${selectedBuilding.id}`, { method: 'DELETE' });
+      const filtered = buildings.filter((b) => b.id !== selectedBuilding.id);
+      setBuildings(filtered);
+      setSelectedBuilding(filtered[0] || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedBuilding) return;
+    try {
+      await api<void>(`/api/Buildings/${selectedBuilding.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      const updatedList = buildings.map((b) =>
+        b.id === selectedBuilding.id ? ({ ...selectedBuilding, ...editForm } as BuildingDTO) : b
+      );
+      setBuildings(updatedList);
+      setSelectedBuilding({ ...selectedBuilding, ...editForm } as BuildingDTO);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Linke Spalte: Liste und Neuerfassung */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        <h2 className="text-2xl font-bold mb-4 border-b pb-2">Gebäude</h2>
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+          {buildings.length === 0 ? (
+            <p className="text-gray-500">Keine Einträge vorhanden.</p>
+          ) : (
+            buildings.map((b) => (
+              <div
+                key={b.id}
+                onClick={() => handleSelectBuilding(b)}
+                className={`p-3 rounded-md cursor-pointer transition-colors ${
+                  selectedBuilding && selectedBuilding.id === b.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                }`}
+              >
+                <p className="font-semibold">{b.name}</p>
+                <p className="text-sm text-gray-600">{b.description}</p>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="mt-4 flex justify-around">
+          <button
+            onClick={() => setIsCreating(!isCreating)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+          >
+            {isCreating ? 'Abbrechen' : 'Neues Gebäude'}
+          </button>
+          <button
+            onClick={handleDeleteBuilding}
+            disabled={!selectedBuilding}
+            className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
+          >
+            Löschen
+          </button>
+        </div>
+        {isCreating && (
+          <div className="mt-6 p-4 border rounded-lg">
+            <h3 className="font-bold mb-3">Neues Gebäude erstellen</h3>
+            <input
+              type="text"
+              placeholder="Name (Bruggerstrasse oder Martinsberg)"
+              value={createForm.name || ''}
+              onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+            <textarea
+              placeholder="Beschreibung"
+              value={createForm.description || ''}
+              onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={handleCreate}
+                className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
+              >
+                Erstellen
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Rechte Spalte: Bearbeiten */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        {selectedBuilding ? (
+          <>
+            <h2 className="text-2xl font-bold mb-4 border-b pb-2">Gebäude bearbeiten</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={editForm.name || ''}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <textarea
+                placeholder="Beschreibung"
+                value={editForm.description || ''}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSaveChanges}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+              >
+                Speichern
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="text-gray-500 text-lg">Wähle ein Gebäude zum Bearbeiten aus.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ----- FloorAdmin Component -----
+const FloorAdmin: React.FC = () => {
+  const buildingNameToId: Record<string, number> = { Bruggerstrasse: 1, Martinsberg: 2 };
+  const buildingOptions = Object.keys(buildingNameToId);
+  const [selectedBuildingName, setSelectedBuildingName] = useState<string>(buildingOptions[0]);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<number>(buildingNameToId[buildingOptions[0]]);
+  const [floors, setFloors] = useState<FloorDTO[]>([]);
+  const [selectedFloor, setSelectedFloor] = useState<FloorDTO | null>(null);
+  const [editForm, setEditForm] = useState<FloorUpdateDTO>({ buildingId: selectedBuildingId });
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [createForm, setCreateForm] = useState<FloorCreateDTO>({ buildingId: selectedBuildingId });
+
+  useEffect(() => {
+    api<FloorDTO[]>(`/api/Buildings/${selectedBuildingId}/floors`)
+      .then((data) => {
+        setFloors(data);
+        if (data.length) setSelectedFloor(data[0]);
+      })
+      .catch((err) => console.error(err));
+  }, [selectedBuildingId]);
+
+  useEffect(() => {
+    if (selectedFloor) {
+      setEditForm({
+        buildingId: selectedFloor.buildingId,
+        name: selectedFloor.name,
+        description: selectedFloor.description,
+      });
+    }
+  }, [selectedFloor]);
+
+  const handleAddFloor = async () => {
+    try {
+      const created = await api<FloorDTO>('/api/Floors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm),
+      });
+      setFloors([...floors, created]);
+      setSelectedFloor(created);
+      setIsCreating(false);
+      setCreateForm({ buildingId: selectedBuildingId });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteFloor = async () => {
+    if (!selectedFloor) return;
+    try {
+      await api<void>(`/api/Floors/${selectedFloor.id}`, { method: 'DELETE' });
+      const filtered = floors.filter((f) => f.id !== selectedFloor.id);
+      setFloors(filtered);
+      setSelectedFloor(filtered[0] || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedFloor) return;
+    try {
+      await api<void>(`/api/Floors/${selectedFloor.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      const updatedList = floors.map((f) =>
+        f.id === selectedFloor.id ? ({ ...selectedFloor, ...editForm } as FloorDTO) : f
+      );
+      setFloors(updatedList);
+      setSelectedFloor({ ...selectedFloor, ...editForm } as FloorDTO);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Gebäude-Auswahl */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        <label className="block font-bold mb-2">Gebäude</label>
+        <select
+          value={selectedBuildingName}
+          onChange={(e) => {
+            const name = e.target.value;
+            setSelectedBuildingName(name);
+            setSelectedBuildingId(buildingNameToId[name]);
+            setSelectedFloor(null);
+            setCreateForm({ buildingId: buildingNameToId[name] });
+          }}
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        >
+          {buildingOptions.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </div>
+      {/* Floor-Liste */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm lg:col-span-1">
+        <h2 className="text-2xl font-bold mb-4 border-b pb-2">
+          Stockwerke ({selectedBuildingName})
+        </h2>
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+          {floors.length === 0 ? (
+            <p className="text-gray-500">Keine Einträge vorhanden.</p>
+          ) : (
+            floors.map((f) => (
+              <div
+                key={f.id}
+                onClick={() => setSelectedFloor(f)}
+                className={`p-3 rounded-md cursor-pointer transition-colors ${
+                  selectedFloor && selectedFloor.id === f.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                }`}
+              >
+                <p className="font-semibold">{f.name}</p>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="mt-4 flex justify-around">
+          <button
+            onClick={() => setIsCreating(!isCreating)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+          >
+            {isCreating ? 'Abbrechen' : 'Neues Stockwerk'}
+          </button>
+          <button
+            onClick={handleDeleteFloor}
+            disabled={!selectedFloor}
+            className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
+          >
+            Löschen
+          </button>
+        </div>
+        {isCreating && (
+          <div className="mt-6 p-4 border rounded-lg">
+            <h3 className="font-bold mb-3">Neues Stockwerk erstellen</h3>
+            <input
+              type="text"
+              placeholder="Name"
+              value={createForm.name || ''}
+              onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+            <textarea
+              placeholder="Beschreibung"
+              value={createForm.description || ''}
+              onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={handleAddFloor}
+                className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
+              >
+                Erstellen
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Detailansicht */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm lg:col-span-1">
+        {selectedFloor ? (
+          <>
+            <h2 className="text-2xl font-bold mb-4 border-b pb-2">Stockwerk bearbeiten</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={editForm.name || ''}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <textarea
+                placeholder="Beschreibung"
+                value={editForm.description || ''}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSaveChanges}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+              >
+                Speichern
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="text-gray-500 text-lg">Wähle ein Stockwerk zum Bearbeiten aus.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ----- RoomAdmin Component -----
+const RoomAdmin: React.FC = () => {
+  const [rooms, setRooms] = useState<RoomDTO[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<RoomDTO | null>(null);
+  const [editForm, setEditForm] = useState<RoomUpdateDTO>({ floorId: 0, capacity: 0, isActive: true });
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [createForm, setCreateForm] = useState<RoomCreateDTO>({ floorId: 1, capacity: 0, isActive: true });
+
+  useEffect(() => {
+    api<RoomDTO[]>('/api/Rooms')
+      .then((data) => {
+        setRooms(data);
+        if (data.length) setSelectedRoom(data[0]);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (selectedRoom) {
+      setEditForm({
+        name: selectedRoom.name,
+        floorId: selectedRoom.floorId,
+        capacity: selectedRoom.capacity,
+        type: selectedRoom.type,
+        isActive: selectedRoom.isActive,
+      });
+    }
+  }, [selectedRoom]);
+
+  const handleAddRoom = async () => {
+    try {
+      const created = await api<RoomDTO>('/api/Rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm),
+      });
+      setRooms([...rooms, created]);
+      setSelectedRoom(created);
+      setIsCreating(false);
+      setCreateForm({ floorId: 1, capacity: 0, isActive: true });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteRoom = async () => {
+    if (!selectedRoom) return;
+    try {
+      await api<void>(`/api/Rooms/${selectedRoom.id}`, { method: 'DELETE' });
+      const filtered = rooms.filter((r) => r.id !== selectedRoom.id);
+      setRooms(filtered);
+      setSelectedRoom(filtered[0] || null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedRoom) return;
+    try {
+      await api<void>(`/api/Rooms/${selectedRoom.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      const updatedList = rooms.map((r) =>
+        r.id === selectedRoom.id ? ({ ...selectedRoom, ...editForm } as RoomDTO) : r
+      );
+      setRooms(updatedList);
+      setSelectedRoom({ ...selectedRoom, ...editForm } as RoomDTO);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Linke Spalte: Liste und Neuerfassung */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        <h2 className="text-2xl font-bold mb-4 border-b pb-2">Räume</h2>
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+          {rooms.length === 0 ? (
+            <p className="text-gray-500">Keine Einträge vorhanden.</p>
+          ) : (
+            rooms.map((r) => (
+              <div
+                key={r.id}
+                onClick={() => {
+                  setIsCreating(false);
+                  setSelectedRoom(r);
+                }}
+                className={`p-3 rounded-md cursor-pointer transition-colors ${
+                  selectedRoom && selectedRoom.id === r.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                }`}
+              >
+                <p className="font-semibold">{r.name}</p>
+                <p className="text-sm text-gray-600">Kapazität: {r.capacity}</p>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="mt-4 flex justify-around">
+          <button
+            onClick={() => setIsCreating(!isCreating)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+          >
+            {isCreating ? 'Abbrechen' : 'Neuen Raum'}
+          </button>
+          <button
+            onClick={handleDeleteRoom}
+            disabled={!selectedRoom}
+            className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
+          >
+            Löschen
+          </button>
+        </div>
+        {isCreating && (
+          <div className="mt-6 p-4 border rounded-lg">
+            <h3 className="font-bold mb-3">Neuen Raum erstellen</h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Name"
+                value={createForm.name || ''}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="number"
+                placeholder="Kapazität"
+                value={createForm.capacity.toString()}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, capacity: parseInt(e.target.value, 10) })
+                }
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="text"
+                placeholder="Typ"
+                value={createForm.type || ''}
+                onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={createForm.isActive}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, isActive: e.target.checked })
+                  }
+                  className="mr-2"
+                />
+                <span className="font-semibold">Aktiv</span>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleAddRoom}
+                className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
+              >
+                Erstellen
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* Rechte Spalte: Bearbeiten */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        {selectedRoom ? (
+          <>
+            <h2 className="text-2xl font-bold mb-4 border-b pb-2">Raum bearbeiten</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={editForm.name || ''}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="number"
+                placeholder="Kapazität"
+                value={editForm.capacity.toString()}
+                onChange={(e) => setEditForm({ ...editForm, capacity: parseInt(e.target.value, 10) })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <input
+                type="text"
+                placeholder="Typ"
+                value={editForm.type || ''}
+                onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={editForm.isActive}
+                  onChange={(e) => setEditForm({ ...editForm, isActive: e.target.checked })}
+                  className="mr-2"
+                />
+                <span className="font-semibold">Aktiv</span>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleSaveChanges}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+              >
+                Speichern
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="text-gray-500 text-lg">Wähle einen Raum zum Bearbeiten aus.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ----- RoomAccessPointAdmin Component -----
+const RoomAccessPointAdmin: React.FC = () => {
+  const [links, setLinks] = useState<RoomAccesspointDTO[]>([]);
+  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [selectedAPId, setSelectedAPId] = useState<number | null>(null);
+
+  useEffect(() => {
+    api<RoomAccesspointDTO[]>('/api/RoomAccessPoints')
+      .then((data) => setLinks(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  const handleAddLink = async () => {
+    if (selectedRoomId === null || selectedAPId === null) return;
+    const newLink: RoomAccesspointCreateDTO = { roomId: selectedRoomId, accesspointId: selectedAPId };
+    try {
+      const created = await api<RoomAccesspointDTO>('/api/RoomAccessPoints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLink),
+      });
+      setLinks([...links, created]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteLink = async (roomId: number, accesspointId: number) => {
+    try {
+      await api<void>(`/api/RoomAccessPoints/${roomId}/${accesspointId}`, { method: 'DELETE' });
+      setLinks(links.filter((link) => !(link.roomId === roomId && link.accesspointId === accesspointId)));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Eingabe */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        <h2 className="text-2xl font-bold mb-4 border-b pb-2">Neue Verknüpfung</h2>
+        <div className="space-y-4">
+          <input
+            type="number"
+            placeholder="Raum-ID"
+            value={selectedRoomId || ''}
+            onChange={(e) => setSelectedRoomId(parseInt(e.target.value, 10))}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+          <input
+            type="number"
+            placeholder="AccessPoint-ID"
+            value={selectedAPId || ''}
+            onChange={(e) => setSelectedAPId(parseInt(e.target.value, 10))}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+        </div>
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={handleAddLink}
+            className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
+            disabled={selectedRoomId === null || selectedAPId === null}
+          >
+            Verknüpfen
+          </button>
+        </div>
+      </div>
+      {/* Liste */}
+      <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+        <h2 className="text-2xl font-bold mb-4 border-b pb-2">Bestehende Verknüpfungen</h2>
+        {links.length === 0 ? (
+          <p className="text-gray-500">Keine Verknüpfungen vorhanden.</p>
+        ) : (
+          <ul className="space-y-3 max-h-80 overflow-y-auto pr-2">
+            {links.map((link, index) => (
+              <li key={index} className="flex justify-between items-center p-3 bg-white rounded-md shadow-sm">
+                <span className="font-medium">Room: {link.roomId} | AP: {link.accesspointId}</span>
+                <button
+                  onClick={() => handleDeleteLink(link.roomId, link.accesspointId)}
+                  className="bg-red-500 text-white px-4 py-1 rounded-full shadow hover:bg-red-600 transition"
+                >
+                  Löschen
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -448,48 +1302,25 @@ export const roomPositions: Record<
 
 
 // ---------------------
-// OccupancyOverlay Component (Berechnung der Raumauslastung mit vorhandenen Endpoints)
+// OccupancyOverlay Component (mit API-Call)
 // ---------------------
-interface OccupancyData {
-  RoomId: number;
-  Occupancy: number;
-}
-
 const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
-  const [occupancyData, setOccupancyData] = useState<OccupancyData[]>([]);
+  const [occupancyData, setOccupancyData] = useState<{ RoomId: number; Occupancy: number }[]>([]);
 
   useEffect(() => {
-    // Parallel alle benötigten Daten abrufen
-    Promise.all([
-      fetch('http://localhost:5000/api/Rooms').then(res => res.json()),
-      fetch('http://localhost:5000/api/RoomAccessPoints').then(res => res.json()),
-      fetch('http://localhost:5000/api/AccessPoints').then(res => res.json())
-    ])
-      .then(([rooms, roomAccessPoints, accessPoints]) => {
-        // Filtere Räume, die dem gewünschten Stockwerk entsprechen
-        const roomsOnFloor = rooms.filter((room: any) => room.floorName === floor);
-        // Berechne für jeden Raum die Auslastung
-        const computedOccupancy = roomsOnFloor.map((room: any) => {
-          // Finde alle Zuordnungen für diesen Raum
-          const mappings = roomAccessPoints.filter((map: any) => map.roomId === room.id);
-          // Summe die connectedDevices der zugeordneten AccessPoints
-          const occupancy = mappings.reduce((sum: number, map: any) => {
-            const ap = accessPoints.find((a: any) => a.id === map.accesspointId);
-            return sum + (ap ? ap.connectedDevices : 0);
-          }, 0);
-          return { RoomId: room.id, Occupancy: occupancy };
-        });
-        setOccupancyData(computedOccupancy);
-      })
+    // Passe hier den API-Endpunkt an
+    fetch(`http://your-backend-url/api/occupancy?floor=${encodeURIComponent(floor)}`)
+      .then(response => response.json())
+      .then(data => setOccupancyData(data))
       .catch(error => console.error("Error fetching occupancy data:", error));
   }, [floor]);
 
-  // roomPositions sollte wie gehabt definiert sein (Mapping: Stockwerk -> Raum-ID -> Position)
+  // Wähle das passende Mapping für die aktuelle Etage
   const positions = roomPositions[floor];
 
   return (
     <>
-      {occupancyData.map(data => {
+      {occupancyData.map((data) => {
         const pos = positions ? positions[data.RoomId.toString()] : undefined;
         if (!pos) return null;
         return (
@@ -508,11 +1339,10 @@ const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
 };
 
 function getRoomColor(occupancy: number): string {
-  if (occupancy < 33) return "rgba(0,255,0,0.4)";   // Grün
-  if (occupancy < 66) return "rgba(255,255,0,0.4)";   // Gelb
-  return "rgba(255,0,0,0.4)";                          // Rot
+  if (occupancy < 33) return "rgba(0,255,0,0.4)";    // Grün
+  if (occupancy < 66) return "rgba(255,255,0,0.4)";    // Gelb
+  return "rgba(255,0,0,0.4)";                           // Rot
 }
-
 
 // ---------------------
 // InteractiveFloorPlan Component (für alle Stockwerke)
@@ -767,9 +1597,12 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Header />
       <Routes>
-        <Route path="/display" element={<FullscreenFloorplan />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        {/* Protected Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
+        <Route path="/display" element={<FullscreenFloorplan />} />
         <Route path="/" element={<UserView />} />
       </Routes>
       <Footer />
