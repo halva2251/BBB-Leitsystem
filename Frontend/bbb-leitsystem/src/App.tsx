@@ -206,7 +206,7 @@ const UserView: React.FC = () => {
                 Github
               </a>{' '}
               oder besuche die{' '}
-              <a href="https://www.baden-hackt.ch" className="text-indigo-600 underline">
+              <a href="https://www.badnpm install --save-dev @types/react-router-domen-hackt.ch" className="text-indigo-600 underline">
                 Webseite Baden Hackt 2025
               </a>.
             </p>
