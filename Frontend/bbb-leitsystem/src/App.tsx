@@ -1,6 +1,6 @@
 // App.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useNavigate, Link} from 'react-router-dom';
 import { UncontrolledReactSVGPanZoom } from 'react-svg-pan-zoom';
 
 
@@ -10,10 +10,10 @@ import { UncontrolledReactSVGPanZoom } from 'react-svg-pan-zoom';
 const Header: React.FC = () => {
   return (
     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-8 py-5 bg-white/70 backdrop-blur-md shadow-lg z-50 border-b border-gray-200">
-      <div className="text-4xl font-bold tracking-tight text-indigo-700">Lernplatz+</div>
+      <div className="text-4xl font-bold tracking-tight text-orange-700">SpotFree</div>
       <Link
         to="/login"
-        className="bg-indigo-900 text-white px-6 py-3 rounded-full font-medium hover:bg-indigo-800 transition"
+        className="bg-orange-900 text-white px-6 py-3 rounded-full font-medium hover:bg-orange-800 transition"
       >
         Admin Panel
       </Link>
@@ -28,17 +28,17 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-white py-4 fixed bottom-0 w-full">
       <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between">
-        <p className="text-base">© 2025 Lernplatz+ - Alle Rechte vorbehalten</p>
+        <p className="text-base">© 2025 SpotFree - Alle Rechte vorbehalten</p>
         <div className="flex space-x-6 mt-2 md:mt-0">
           <a
             href="https://github.com/halva2251/BBB-Leitsystem/tree/main"
-            className="text-base hover:text-indigo-400 transition"
+            className="text-base hover:text-orange-400 transition"
           >
             Github
           </a>
           <a
             href="https://www.baden-hackt.ch"
-            className="text-base hover:text-indigo-400 transition"
+            className="text-base hover:text-orange-400 transition"
           >
             Webseite Baden Hackt 2025
           </a>
@@ -78,19 +78,19 @@ const LoginPage: React.FC = () => {
             <label className="block text-base font-semibold text-gray-600">Email</label>
             <input
               type="email"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-base"
             />
           </div>
           <div>
             <label className="block text-base font-semibold text-gray-600">Password</label>
             <input
               type="password"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-base"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition duration-300 mt-4 text-base"
+            className="w-full bg-orange-600 text-white py-3 rounded-xl font-semibold hover:bg-orange-700 transition duration-300 mt-4 text-base"
           >
             Login
           </button>
@@ -104,7 +104,6 @@ const LoginPage: React.FC = () => {
 // ---------------------
 // AdminDashboard Component (dynamisches Accesspoint-Management)
 // ---------------------
-// ----- Schnittstellen basierend auf dem Schema -----
 // ----- Schnittstellen basierend auf dem Schema -----
 export interface AccessPointDto {
   id: number;
@@ -224,17 +223,17 @@ export interface RoomAccesspointCreateDTO {
 }
 
 // ----- Hilfsfunktion: API-Call -----
+// Wir verwenden hier den Basis-URL "http://localhost:5000"
 async function api<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
+  const baseUrl = 'http://localhost:5000';
+  const res = await fetch(`${baseUrl}${url}`, options);
   if (!res.ok) {
     throw new Error(`API Error: ${res.statusText}`);
   }
   return res.json();
 }
 
-// ----- AdminDashboard mit moderner, übersichtlicher UI -----
-// Es gibt Tabs für die einzelnen Module. Die Erfassung neuer Datensätze erfolgt
-// über integrierte Formulare, deren Daten per API in die Datenbank geschrieben werden.
+// ----- Hauptkomponente: AdminDashboard mit Tab-Navigation -----
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'accesspoints' | 'buildings' | 'floors' | 'rooms' | 'roomaccesspoints'
@@ -243,7 +242,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-green-50 text-gray-800">
       <div className="container mx-auto p-8 pt-32">
-        <h1 className="text-5xl font-extrabold text-indigo-800 text-center mb-10">
+        <h1 className="text-5xl font-extrabold text-orange-800 text-center mb-10">
           Admin Dashboard
         </h1>
         <nav className="mb-10">
@@ -257,11 +256,12 @@ const AdminDashboard: React.FC = () => {
             ].map((tab) => (
               <li key={tab.id}>
                 <button
+                  type="button"
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`px-6 py-3 rounded-full transition-all font-semibold shadow-md ${
                     activeTab === tab.id
-                      ? 'bg-indigo-600 text-white transform scale-105'
-                      : 'bg-white text-gray-800 hover:bg-indigo-100'
+                      ? 'bg-orange-600 text-white transform scale-105'
+                      : 'bg-orange-600 text-white transform scale-105'
                   }`}
                 >
                   {tab.label}
@@ -286,34 +286,65 @@ const AdminDashboard: React.FC = () => {
 const AccessPointAdmin: React.FC = () => {
   const [accessPoints, setAccessPoints] = useState<AccessPointDto[]>([]);
   const [selectedAP, setSelectedAP] = useState<AccessPointDto | null>(null);
-  const [editForm, setEditForm] = useState<AccessPointUpdateDTO>({ connectedDevices: 0 });
+  const [editForm, setEditForm] = useState<AccessPointUpdateDTO>({
+    name: "",
+    mac: "",
+    ipAddress: "",
+    description: "",
+    connectedDevices: 0,
+    group: "",
+    status: "",
+    model: "",
+    swVersion: "",
+    channel: "",
+    band: "",
+    uptime: ""
+  });
   const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [createForm, setCreateForm] = useState<AccessPointCreateDTO>({ connectedDevices: 0 });
+  const [createForm, setCreateForm] = useState<AccessPointCreateDTO>({
+    name: "",
+    mac: "",
+    ipAddress: "",
+    description: "",
+    connectedDevices: 0,
+    group: "",
+    status: "",
+    model: "",
+    swVersion: "",
+    channel: "",
+    band: "",
+    uptime: ""
+  });
+
+  const fetchAccessPoints = async () => {
+    try {
+      const data = await api<AccessPointDto[]>('/api/AccessPoints');
+      setAccessPoints(data);
+      if (data.length) setSelectedAP(data[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    api<AccessPointDto[]>('/api/AccessPoints')
-      .then((data) => {
-        setAccessPoints(data);
-        if (data.length) setSelectedAP(data[0]);
-      })
-      .catch((err) => console.error(err));
+    fetchAccessPoints();
   }, []);
 
   useEffect(() => {
     if (selectedAP) {
       setEditForm({
-        name: selectedAP.name,
-        mac: selectedAP.mac,
-        ipAddress: selectedAP.ipAddress,
-        description: selectedAP.description,
+        name: selectedAP.name || "",
+        mac: selectedAP.mac || "",
+        ipAddress: selectedAP.ipAddress || "",
+        description: selectedAP.description || "",
         connectedDevices: selectedAP.connectedDevices,
-        group: selectedAP.group,
-        status: selectedAP.status,
-        model: selectedAP.model,
-        swVersion: selectedAP.swVersion,
-        channel: selectedAP.channel,
-        band: selectedAP.band,
-        uptime: selectedAP.uptime,
+        group: selectedAP.group || "",
+        status: selectedAP.status || "",
+        model: selectedAP.model || "",
+        swVersion: selectedAP.swVersion || "",
+        channel: selectedAP.channel || "",
+        band: selectedAP.band || "",
+        uptime: selectedAP.uptime || ""
       });
     }
   }, [selectedAP]);
@@ -325,15 +356,27 @@ const AccessPointAdmin: React.FC = () => {
 
   const handleCreate = async () => {
     try {
-      const created = await api<AccessPointDto>('/api/AccessPoints', {
+      await api<AccessPointDto>('/api/AccessPoints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
       });
-      setAccessPoints([...accessPoints, created]);
-      setSelectedAP(created);
+      await fetchAccessPoints();
       setIsCreating(false);
-      setCreateForm({ connectedDevices: 0 });
+      setCreateForm({
+        name: "",
+        mac: "",
+        ipAddress: "",
+        description: "",
+        connectedDevices: 0,
+        group: "",
+        status: "",
+        model: "",
+        swVersion: "",
+        channel: "",
+        band: "",
+        uptime: ""
+      });
     } catch (err) {
       console.error(err);
     }
@@ -343,9 +386,7 @@ const AccessPointAdmin: React.FC = () => {
     if (!selectedAP) return;
     try {
       await api<void>(`/api/AccessPoints/${selectedAP.id}`, { method: 'DELETE' });
-      const filtered = accessPoints.filter((ap) => ap.id !== selectedAP.id);
-      setAccessPoints(filtered);
-      setSelectedAP(filtered[0] || null);
+      await fetchAccessPoints();
     } catch (err) {
       console.error(err);
     }
@@ -359,11 +400,7 @@ const AccessPointAdmin: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
-      const updatedList = accessPoints.map((ap) =>
-        ap.id === selectedAP.id ? ({ ...selectedAP, ...editForm } as AccessPointDto) : ap
-      );
-      setAccessPoints(updatedList);
-      setSelectedAP({ ...selectedAP, ...editForm } as AccessPointDto);
+      await fetchAccessPoints();
     } catch (err) {
       console.error(err);
     }
@@ -371,7 +408,7 @@ const AccessPointAdmin: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Linke Spalte: Liste und Neuerfassung */}
+      {/* Left Column: List & Create */}
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         <h2 className="text-2xl font-bold mb-4 border-b pb-2">Accesspoints</h2>
         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
@@ -383,7 +420,7 @@ const AccessPointAdmin: React.FC = () => {
                 key={ap.id}
                 onClick={() => handleSelectAP(ap)}
                 className={`p-3 rounded-md cursor-pointer transition-colors ${
-                  selectedAP && selectedAP.id === ap.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                  selectedAP && selectedAP.id === ap.id ? 'bg-orange-100' : 'hover:bg-gray-100'
                 }`}
               >
                 <p className="font-semibold">{ap.name}</p>
@@ -394,15 +431,17 @@ const AccessPointAdmin: React.FC = () => {
         </div>
         <div className="mt-4 flex justify-around">
           <button
+            type="button"
             onClick={() => setIsCreating(!isCreating)}
             className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
           >
             {isCreating ? 'Abbrechen' : 'Neuer Accesspoint'}
           </button>
           <button
+            type="button"
             onClick={handleDeleteAP}
-            className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
             disabled={!selectedAP}
+            className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
           >
             Löschen
           </button>
@@ -414,33 +453,92 @@ const AccessPointAdmin: React.FC = () => {
               <input
                 type="text"
                 placeholder="Name"
-                value={createForm.name || ''}
+                value={createForm.name}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="text"
                 placeholder="MAC"
-                value={createForm.mac || ''}
+                value={createForm.mac}
                 onChange={(e) => setCreateForm({ ...createForm, mac: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="text"
                 placeholder="IP Address"
-                value={createForm.ipAddress || ''}
+                value={createForm.ipAddress}
                 onChange={(e) => setCreateForm({ ...createForm, ipAddress: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <textarea
                 placeholder="Beschreibung"
-                value={createForm.description || ''}
+                value={createForm.description}
                 onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="number"
+                placeholder="Connected Devices"
+                value={createForm.connectedDevices.toString()}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, connectedDevices: parseInt(e.target.value, 10) })
+                }
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Group"
+                value={createForm.group}
+                onChange={(e) => setCreateForm({ ...createForm, group: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Status"
+                value={createForm.status}
+                onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Model"
+                value={createForm.model}
+                onChange={(e) => setCreateForm({ ...createForm, model: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="SW Version"
+                value={createForm.swVersion}
+                onChange={(e) => setCreateForm({ ...createForm, swVersion: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Channel"
+                value={createForm.channel}
+                onChange={(e) => setCreateForm({ ...createForm, channel: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Band"
+                value={createForm.band}
+                onChange={(e) => setCreateForm({ ...createForm, band: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Uptime"
+                value={createForm.uptime}
+                onChange={(e) => setCreateForm({ ...createForm, uptime: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end mt-4">
               <button
+                type="button"
                 onClick={handleCreate}
                 className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
               >
@@ -450,7 +548,7 @@ const AccessPointAdmin: React.FC = () => {
           </div>
         )}
       </div>
-      {/* Rechte Spalte: Bearbeiten */}
+      {/* Right Column: Edit */}
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         {selectedAP ? (
           <>
@@ -459,35 +557,94 @@ const AccessPointAdmin: React.FC = () => {
               <input
                 type="text"
                 placeholder="Name"
-                value={editForm.name || ''}
+                value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="text"
                 placeholder="MAC"
-                value={editForm.mac || ''}
+                value={editForm.mac}
                 onChange={(e) => setEditForm({ ...editForm, mac: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="text"
                 placeholder="IP Address"
-                value={editForm.ipAddress || ''}
+                value={editForm.ipAddress}
                 onChange={(e) => setEditForm({ ...editForm, ipAddress: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <textarea
                 placeholder="Beschreibung"
-                value={editForm.description || ''}
+                value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="number"
+                placeholder="Connected Devices"
+                value={editForm.connectedDevices.toString()}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, connectedDevices: parseInt(e.target.value, 10) })
+                }
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Group"
+                value={editForm.group}
+                onChange={(e) => setEditForm({ ...editForm, group: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Status"
+                value={editForm.status}
+                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Model"
+                value={editForm.model}
+                onChange={(e) => setEditForm({ ...editForm, model: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="SW Version"
+                value={editForm.swVersion}
+                onChange={(e) => setEditForm({ ...editForm, swVersion: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Channel"
+                value={editForm.channel}
+                onChange={(e) => setEditForm({ ...editForm, channel: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Band"
+                value={editForm.band}
+                onChange={(e) => setEditForm({ ...editForm, band: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Uptime"
+                value={editForm.uptime}
+                onChange={(e) => setEditForm({ ...editForm, uptime: e.target.value })}
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
             <div className="mt-6 flex justify-end">
               <button
+                type="button"
                 onClick={handleSaveChanges}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+                className="bg-orange-600 text-white px-6 py-2 rounded-full shadow hover:bg-orange-700 transition"
               >
                 Speichern
               </button>
@@ -509,19 +666,24 @@ const BuildingAdmin: React.FC = () => {
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [createForm, setCreateForm] = useState<BuildingCreateDTO>({});
 
+  const fetchBuildings = async () => {
+    try {
+      const data = await api<BuildingDTO[]>('/api/Buildings');
+      const filtered = data.filter(
+        (b) =>
+          b.name?.trim().toLowerCase() === 'bruggerstrasse' ||
+          b.name?.trim().toLowerCase() === 'martinsberg'
+      );
+      setBuildings(filtered);
+      if (filtered.length) setSelectedBuilding(filtered[0]);
+      else setSelectedBuilding(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    api<BuildingDTO[]>('/api/Buildings')
-      .then((data) => {
-        // Nur die Gebäude "Bruggerstrasse" und "Martinsberg"
-        const filtered = data.filter(
-          (b) =>
-            b.name?.toLowerCase() === 'bruggerstrasse' ||
-            b.name?.toLowerCase() === 'martinsberg'
-        );
-        setBuildings(filtered);
-        if (filtered.length) setSelectedBuilding(filtered[0]);
-      })
-      .catch((err) => console.error(err));
+    fetchBuildings();
   }, []);
 
   useEffect(() => {
@@ -537,20 +699,14 @@ const BuildingAdmin: React.FC = () => {
 
   const handleCreate = async () => {
     try {
-      const created = await api<BuildingDTO>('/api/Buildings', {
+      await api<BuildingDTO>('/api/Buildings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
       });
-      if (
-        created.name?.toLowerCase() === 'bruggerstrasse' ||
-        created.name?.toLowerCase() === 'martinsberg'
-      ) {
-        setBuildings([...buildings, created]);
-        setSelectedBuilding(created);
-        setIsCreating(false);
-        setCreateForm({});
-      }
+      await fetchBuildings();
+      setIsCreating(false);
+      setCreateForm({});
     } catch (err) {
       console.error(err);
     }
@@ -560,9 +716,7 @@ const BuildingAdmin: React.FC = () => {
     if (!selectedBuilding) return;
     try {
       await api<void>(`/api/Buildings/${selectedBuilding.id}`, { method: 'DELETE' });
-      const filtered = buildings.filter((b) => b.id !== selectedBuilding.id);
-      setBuildings(filtered);
-      setSelectedBuilding(filtered[0] || null);
+      await fetchBuildings();
     } catch (err) {
       console.error(err);
     }
@@ -576,11 +730,7 @@ const BuildingAdmin: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
-      const updatedList = buildings.map((b) =>
-        b.id === selectedBuilding.id ? ({ ...selectedBuilding, ...editForm } as BuildingDTO) : b
-      );
-      setBuildings(updatedList);
-      setSelectedBuilding({ ...selectedBuilding, ...editForm } as BuildingDTO);
+      await fetchBuildings();
     } catch (err) {
       console.error(err);
     }
@@ -600,7 +750,7 @@ const BuildingAdmin: React.FC = () => {
                 key={b.id}
                 onClick={() => handleSelectBuilding(b)}
                 className={`p-3 rounded-md cursor-pointer transition-colors ${
-                  selectedBuilding && selectedBuilding.id === b.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                  selectedBuilding && selectedBuilding.id === b.id ? 'bg-orange-100' : 'hover:bg-gray-100'
                 }`}
               >
                 <p className="font-semibold">{b.name}</p>
@@ -611,12 +761,14 @@ const BuildingAdmin: React.FC = () => {
         </div>
         <div className="mt-4 flex justify-around">
           <button
+            type="button"
             onClick={() => setIsCreating(!isCreating)}
             className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
           >
             {isCreating ? 'Abbrechen' : 'Neues Gebäude'}
           </button>
           <button
+            type="button"
             onClick={handleDeleteBuilding}
             disabled={!selectedBuilding}
             className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
@@ -632,16 +784,17 @@ const BuildingAdmin: React.FC = () => {
               placeholder="Name (Bruggerstrasse oder Martinsberg)"
               value={createForm.name || ''}
               onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
             <textarea
               placeholder="Beschreibung"
               value={createForm.description || ''}
               onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
             <div className="flex justify-end">
               <button
+                type="button"
                 onClick={handleCreate}
                 className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
               >
@@ -662,19 +815,20 @@ const BuildingAdmin: React.FC = () => {
                 placeholder="Name"
                 value={editForm.name || ''}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <textarea
                 placeholder="Beschreibung"
                 value={editForm.description || ''}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
             <div className="mt-6 flex justify-end">
               <button
+                type="button"
                 onClick={handleSaveChanges}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+                className="bg-orange-600 text-white px-6 py-2 rounded-full shadow hover:bg-orange-700 transition"
               >
                 Speichern
               </button>
@@ -700,13 +854,19 @@ const FloorAdmin: React.FC = () => {
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [createForm, setCreateForm] = useState<FloorCreateDTO>({ buildingId: selectedBuildingId });
 
+  const fetchFloors = async () => {
+    try {
+      const data = await api<FloorDTO[]>(`/api/Buildings/${selectedBuildingId}/floors`);
+      setFloors(data);
+      if (data.length) setSelectedFloor(data[0]);
+      else setSelectedFloor(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    api<FloorDTO[]>(`/api/Buildings/${selectedBuildingId}/floors`)
-      .then((data) => {
-        setFloors(data);
-        if (data.length) setSelectedFloor(data[0]);
-      })
-      .catch((err) => console.error(err));
+    fetchFloors();
   }, [selectedBuildingId]);
 
   useEffect(() => {
@@ -726,8 +886,7 @@ const FloorAdmin: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
       });
-      setFloors([...floors, created]);
-      setSelectedFloor(created);
+      await fetchFloors();
       setIsCreating(false);
       setCreateForm({ buildingId: selectedBuildingId });
     } catch (err) {
@@ -739,9 +898,7 @@ const FloorAdmin: React.FC = () => {
     if (!selectedFloor) return;
     try {
       await api<void>(`/api/Floors/${selectedFloor.id}`, { method: 'DELETE' });
-      const filtered = floors.filter((f) => f.id !== selectedFloor.id);
-      setFloors(filtered);
-      setSelectedFloor(filtered[0] || null);
+      await fetchFloors();
     } catch (err) {
       console.error(err);
     }
@@ -755,11 +912,7 @@ const FloorAdmin: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
-      const updatedList = floors.map((f) =>
-        f.id === selectedFloor.id ? ({ ...selectedFloor, ...editForm } as FloorDTO) : f
-      );
-      setFloors(updatedList);
-      setSelectedFloor({ ...selectedFloor, ...editForm } as FloorDTO);
+      await fetchFloors();
     } catch (err) {
       console.error(err);
     }
@@ -779,7 +932,7 @@ const FloorAdmin: React.FC = () => {
             setSelectedFloor(null);
             setCreateForm({ buildingId: buildingNameToId[name] });
           }}
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
         >
           {buildingOptions.map((name) => (
             <option key={name} value={name}>
@@ -802,7 +955,7 @@ const FloorAdmin: React.FC = () => {
                 key={f.id}
                 onClick={() => setSelectedFloor(f)}
                 className={`p-3 rounded-md cursor-pointer transition-colors ${
-                  selectedFloor && selectedFloor.id === f.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                  selectedFloor && selectedFloor.id === f.id ? 'bg-orange-100' : 'hover:bg-gray-100'
                 }`}
               >
                 <p className="font-semibold">{f.name}</p>
@@ -812,12 +965,14 @@ const FloorAdmin: React.FC = () => {
         </div>
         <div className="mt-4 flex justify-around">
           <button
+            type="button"
             onClick={() => setIsCreating(!isCreating)}
             className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
           >
             {isCreating ? 'Abbrechen' : 'Neues Stockwerk'}
           </button>
           <button
+            type="button"
             onClick={handleDeleteFloor}
             disabled={!selectedFloor}
             className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
@@ -833,16 +988,17 @@ const FloorAdmin: React.FC = () => {
               placeholder="Name"
               value={createForm.name || ''}
               onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
             <textarea
               placeholder="Beschreibung"
               value={createForm.description || ''}
               onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
-              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
             <div className="flex justify-end">
               <button
+                type="button"
                 onClick={handleAddFloor}
                 className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
               >
@@ -863,19 +1019,20 @@ const FloorAdmin: React.FC = () => {
                 placeholder="Name"
                 value={editForm.name || ''}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <textarea
                 placeholder="Beschreibung"
                 value={editForm.description || ''}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
             <div className="mt-6 flex justify-end">
               <button
+                type="button"
                 onClick={handleSaveChanges}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+                className="bg-orange-600 text-white px-6 py-2 rounded-full shadow hover:bg-orange-700 transition"
               >
                 Speichern
               </button>
@@ -890,26 +1047,44 @@ const FloorAdmin: React.FC = () => {
 };
 
 // ----- RoomAdmin Component -----
+// ----- RoomAdmin Component -----
 const RoomAdmin: React.FC = () => {
+  // We assume that the room "name" (string) is used as the numeric identifier to link the room with the SVG.
   const [rooms, setRooms] = useState<RoomDTO[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<RoomDTO | null>(null);
-  const [editForm, setEditForm] = useState<RoomUpdateDTO>({ floorId: 0, capacity: 0, isActive: true });
+  const [editForm, setEditForm] = useState<RoomUpdateDTO>({
+    floorId: 0,
+    capacity: 0,
+    isActive: true,
+    name: ""
+  });
   const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [createForm, setCreateForm] = useState<RoomCreateDTO>({ floorId: 1, capacity: 0, isActive: true });
+  const [createForm, setCreateForm] = useState<RoomCreateDTO>({
+    floorId: 1,
+    capacity: 0,
+    isActive: true,
+    name: ""
+  });
+
+  const fetchRooms = async () => {
+    try {
+      const data = await api<RoomDTO[]>('/api/Rooms');
+      setRooms(data);
+      if (data.length) setSelectedRoom(data[0]);
+      else setSelectedRoom(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    api<RoomDTO[]>('/api/Rooms')
-      .then((data) => {
-        setRooms(data);
-        if (data.length) setSelectedRoom(data[0]);
-      })
-      .catch((err) => console.error(err));
+    fetchRooms();
   }, []);
 
   useEffect(() => {
     if (selectedRoom) {
       setEditForm({
-        name: selectedRoom.name,
+        name: selectedRoom.name || "",
         floorId: selectedRoom.floorId,
         capacity: selectedRoom.capacity,
         type: selectedRoom.type,
@@ -920,15 +1095,14 @@ const RoomAdmin: React.FC = () => {
 
   const handleAddRoom = async () => {
     try {
-      const created = await api<RoomDTO>('/api/Rooms', {
+      await api<RoomDTO>('/api/Rooms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm),
       });
-      setRooms([...rooms, created]);
-      setSelectedRoom(created);
+      await fetchRooms();
       setIsCreating(false);
-      setCreateForm({ floorId: 1, capacity: 0, isActive: true });
+      setCreateForm({ floorId: 1, capacity: 0, isActive: true, name: "" });
     } catch (err) {
       console.error(err);
     }
@@ -938,9 +1112,7 @@ const RoomAdmin: React.FC = () => {
     if (!selectedRoom) return;
     try {
       await api<void>(`/api/Rooms/${selectedRoom.id}`, { method: 'DELETE' });
-      const filtered = rooms.filter((r) => r.id !== selectedRoom.id);
-      setRooms(filtered);
-      setSelectedRoom(filtered[0] || null);
+      await fetchRooms();
     } catch (err) {
       console.error(err);
     }
@@ -954,50 +1126,74 @@ const RoomAdmin: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
-      const updatedList = rooms.map((r) =>
-        r.id === selectedRoom.id ? ({ ...selectedRoom, ...editForm } as RoomDTO) : r
-      );
-      setRooms(updatedList);
-      setSelectedRoom({ ...selectedRoom, ...editForm } as RoomDTO);
+      await fetchRooms();
     } catch (err) {
       console.error(err);
     }
   };
 
+  // Helper: check if room is correctly linked to an SVG room.
+  // It assumes that roomPositions contains a mapping for the current floor.
+  // For this example, we assume that each room's floorId can be used to determine the floor label.
+  const getFloorLabel = (floorId: number): string => {
+    // For demonstration, we assume:
+    // 1 -> "EG", 2 -> "1. Stock", 3 -> "2. Stock", etc.
+    switch (floorId) {
+      case 1: return "EG";
+      case 2: return "1. Stock";
+      case 3: return "2. Stock";
+      case 4: return "3. Stock";
+      case 5: return "4. Stock";
+      case 6: return "5. Stock";
+      default: return "EG";
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Linke Spalte: Liste und Neuerfassung */}
+      {/* Left Column: Room List and Create */}
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         <h2 className="text-2xl font-bold mb-4 border-b pb-2">Räume</h2>
         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
           {rooms.length === 0 ? (
             <p className="text-gray-500">Keine Einträge vorhanden.</p>
           ) : (
-            rooms.map((r) => (
-              <div
-                key={r.id}
-                onClick={() => {
-                  setIsCreating(false);
-                  setSelectedRoom(r);
-                }}
-                className={`p-3 rounded-md cursor-pointer transition-colors ${
-                  selectedRoom && selectedRoom.id === r.id ? 'bg-indigo-100' : 'hover:bg-gray-100'
-                }`}
-              >
-                <p className="font-semibold">{r.name}</p>
-                <p className="text-sm text-gray-600">Kapazität: {r.capacity}</p>
-              </div>
-            ))
+            rooms.map((r) => {
+              const floor = getFloorLabel(r.floorId);
+              const isLinked = roomPositions[floor] && roomPositions[floor][r.name || ""];
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => {
+                    setIsCreating(false);
+                    setSelectedRoom(r);
+                  }}
+                  className={`p-3 rounded-md cursor-pointer transition-colors ${
+                    selectedRoom && selectedRoom.id === r.id ? 'bg-orange-100' : 'hover:bg-gray-100'
+                  }`}
+                >
+                  <p className="font-semibold">Raum {r.name}</p>
+                  <p className="text-sm text-gray-600">Kapazität: {r.capacity}</p>
+                  <p className="text-xs text-gray-500">
+                    {isLinked
+                      ? `Verknüpft mit SVG-Raum ${r.name}`
+                      : `Kein SVG-Link (erwarte Nummer ${r.name})`}
+                  </p>
+                </div>
+              );
+            })
           )}
         </div>
         <div className="mt-4 flex justify-around">
           <button
+            type="button"
             onClick={() => setIsCreating(!isCreating)}
             className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
           >
             {isCreating ? 'Abbrechen' : 'Neuen Raum'}
           </button>
           <button
+            type="button"
             onClick={handleDeleteRoom}
             disabled={!selectedRoom}
             className="bg-red-500 text-white px-4 py-2 rounded-full shadow hover:bg-red-600 transition"
@@ -1011,10 +1207,10 @@ const RoomAdmin: React.FC = () => {
             <div className="space-y-3">
               <input
                 type="text"
-                placeholder="Name"
-                value={createForm.name || ''}
+                placeholder="Raum Nummer (z.B. 1, 2, 3, …)"
+                value={createForm.name || ""}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="number"
@@ -1023,14 +1219,14 @@ const RoomAdmin: React.FC = () => {
                 onChange={(e) =>
                   setCreateForm({ ...createForm, capacity: parseInt(e.target.value, 10) })
                 }
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="text"
                 placeholder="Typ"
-                value={createForm.type || ''}
+                value={createForm.type || ""}
                 onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <div className="flex items-center">
                 <input
@@ -1044,8 +1240,9 @@ const RoomAdmin: React.FC = () => {
                 <span className="font-semibold">Aktiv</span>
               </div>
             </div>
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end mt-4">
               <button
+                type="button"
                 onClick={handleAddRoom}
                 className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
               >
@@ -1055,7 +1252,7 @@ const RoomAdmin: React.FC = () => {
           </div>
         )}
       </div>
-      {/* Rechte Spalte: Bearbeiten */}
+      {/* Right Column: Edit */}
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         {selectedRoom ? (
           <>
@@ -1063,24 +1260,26 @@ const RoomAdmin: React.FC = () => {
             <div className="space-y-4">
               <input
                 type="text"
-                placeholder="Name"
-                value={editForm.name || ''}
+                placeholder="Raum Nummer (z.B. 1, 2, 3, …)"
+                value={editForm.name || ""}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="number"
                 placeholder="Kapazität"
                 value={editForm.capacity.toString()}
-                onChange={(e) => setEditForm({ ...editForm, capacity: parseInt(e.target.value, 10) })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                onChange={(e) =>
+                  setEditForm({ ...editForm, capacity: parseInt(e.target.value, 10) })
+                }
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="text"
                 placeholder="Typ"
-                value={editForm.type || ''}
+                value={editForm.type || ""}
                 onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <div className="flex items-center">
                 <input
@@ -1094,8 +1293,9 @@ const RoomAdmin: React.FC = () => {
             </div>
             <div className="mt-6 flex justify-end">
               <button
+                type="button"
                 onClick={handleSaveChanges}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-full shadow hover:bg-indigo-700 transition"
+                className="bg-orange-600 text-white px-6 py-2 rounded-full shadow hover:bg-orange-700 transition"
               >
                 Speichern
               </button>
@@ -1109,28 +1309,36 @@ const RoomAdmin: React.FC = () => {
   );
 };
 
+
 // ----- RoomAccessPointAdmin Component -----
 const RoomAccessPointAdmin: React.FC = () => {
   const [links, setLinks] = useState<RoomAccesspointDTO[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [selectedAPId, setSelectedAPId] = useState<number | null>(null);
 
+  const fetchLinks = async () => {
+    try {
+      const data = await api<RoomAccesspointDTO[]>('/api/RoomAccessPoints');
+      setLinks(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    api<RoomAccesspointDTO[]>('/api/RoomAccessPoints')
-      .then((data) => setLinks(data))
-      .catch((err) => console.error(err));
+    fetchLinks();
   }, []);
 
   const handleAddLink = async () => {
     if (selectedRoomId === null || selectedAPId === null) return;
     const newLink: RoomAccesspointCreateDTO = { roomId: selectedRoomId, accesspointId: selectedAPId };
     try {
-      const created = await api<RoomAccesspointDTO>('/api/RoomAccessPoints', {
+      await api<RoomAccesspointDTO>('/api/RoomAccessPoints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newLink),
       });
-      setLinks([...links, created]);
+      await fetchLinks();
     } catch (err) {
       console.error(err);
     }
@@ -1139,15 +1347,18 @@ const RoomAccessPointAdmin: React.FC = () => {
   const handleDeleteLink = async (roomId: number, accesspointId: number) => {
     try {
       await api<void>(`/api/RoomAccessPoints/${roomId}/${accesspointId}`, { method: 'DELETE' });
-      setLinks(links.filter((link) => !(link.roomId === roomId && link.accesspointId === accesspointId)));
+      await fetchLinks();
     } catch (err) {
       console.error(err);
     }
   };
 
+  // For demonstration, we assume the current floor is "EG"
+  const currentFloor = "EG";
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Eingabe */}
+      {/* Input Section */}
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         <h2 className="text-2xl font-bold mb-4 border-b pb-2">Neue Verknüpfung</h2>
         <div className="space-y-4">
@@ -1156,18 +1367,19 @@ const RoomAccessPointAdmin: React.FC = () => {
             placeholder="Raum-ID"
             value={selectedRoomId || ''}
             onChange={(e) => setSelectedRoomId(parseInt(e.target.value, 10))}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
           <input
             type="number"
             placeholder="AccessPoint-ID"
             value={selectedAPId || ''}
             onChange={(e) => setSelectedAPId(parseInt(e.target.value, 10))}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
           />
         </div>
         <div className="mt-6 flex justify-center">
           <button
+            type="button"
             onClick={handleAddLink}
             className="bg-green-600 text-white px-6 py-2 rounded-full shadow hover:bg-green-700 transition"
             disabled={selectedRoomId === null || selectedAPId === null}
@@ -1176,152 +1388,164 @@ const RoomAccessPointAdmin: React.FC = () => {
           </button>
         </div>
       </div>
-      {/* Liste */}
+      {/* List Section */}
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         <h2 className="text-2xl font-bold mb-4 border-b pb-2">Bestehende Verknüpfungen</h2>
         {links.length === 0 ? (
           <p className="text-gray-500">Keine Verknüpfungen vorhanden.</p>
         ) : (
           <ul className="space-y-3 max-h-80 overflow-y-auto pr-2">
-            {links.map((link, index) => (
-              <li key={index} className="flex justify-between items-center p-3 bg-white rounded-md shadow-sm">
-                <span className="font-medium">Room: {link.roomId} | AP: {link.accesspointId}</span>
-                <button
-                  onClick={() => handleDeleteLink(link.roomId, link.accesspointId)}
-                  className="bg-red-500 text-white px-4 py-1 rounded-full shadow hover:bg-red-600 transition"
-                >
-                  Löschen
-                </button>
-              </li>
-            ))}
+            {links.map((link, index) => {
+              // Retrieve room position using the current floor and room ID
+              const pos = roomPositions[currentFloor]?.[link.roomId.toString()];
+              return (
+                <li key={index} className="flex justify-between items-center p-3 bg-white rounded-md shadow-sm">
+                  <span className="font-medium">
+                    Room: {link.roomId} | AP: {link.accesspointId}
+                    {pos && (
+                      <span className="ml-2 text-xs text-gray-500">
+                        (x: {pos.x}, y: {pos.y})
+                      </span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteLink(link.roomId, link.accesspointId)}
+                    className="bg-red-500 text-white px-4 py-1 rounded-full shadow hover:bg-red-600 transition"
+                  >
+                    Löschen
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
     </div>
   );
 };
-
 // ---------------------
 // Room Position Mapping (nach Etagen) – momentan leer, bitte ergänze selbst!
-export const roomPositions: Record<
-  string,
-  Record<string, { x: number; y: number; width: number; height: number }>
-> = {
-  EG: {
-    // Werte aus B_EG
-    "1": { x: 219.5, y: 82.5, width: 222, height: 165 },  // eg-Raum1
-    "2": { x: 811.5, y: 82.5, width: 203, height: 165 },  // eg-Raum2
-    "3": { x: 1425.5, y: 82.5, width: 369, height: 165 }, // eg-Raum3
-    "4": { x: 1019.5, y: 82.5, width: 244, height: 165 }, // eg-Raum4
-    "5": { x: 436.5, y: 82.5, width: 240, height: 165 },  // eg-Raum5
-    "6": { x: 760.5, y: 252.5, width: 431, height: 165 }, // eg-Raum6
-    "7": { x: 1710.5, y: 252.5, width: 84, height: 89 },  // eg-Raum7
-    "8": { x: 1347.5, y: 252.5, width: 358, height: 165 },// eg-Raum8
-    "9": { x: 400.5, y: 252.5, width: 222, height: 165 }, // eg-Raum9
-    "10": { x: 169.5, y: 252.5, width: 226, height: 165 },// eg-Raum10
-  },
-  "1. Stock": {
-    // Werte aus B_1
-    "1": { x: 219.5, y: 82.5, width: 235, height: 165 },  // og1-Raum1
-    "2": { x: 811.5, y: 82.5, width: 222, height: 165 },  // og1-Raum2
-    "3": { x: 459.5, y: 82.5, width: 217, height: 165 },  // og1-Raum3
-    "4": { x: 1615.5, y: 82.5, width: 179, height: 165 }, // og1-Raum4
-    "5": { x: 1425.5, y: 82.5, width: 185, height: 165 }, // og1-Raum5
-    "6": { x: 1038.5, y: 82.5, width: 225, height: 165 }, // og1-Raum8
-    "7": { x: 1361.5, y: 252.5, width: 154, height: 165 }, // og1-Raum6
-    "8": { x: 1520.5, y: 252.5, width: 185, height: 165 }, // og1-Raum7
-    "9": { x: 1707.5, y: 252.5, width: 84, height: 89 },   // og1-Raum9
-    "10": { x: 100, y: 250, width: 525, height: 170 },       // og1-Raum10 (graues Areal als Raum)
-    "11": { x: 758, y: 250, width: 436, height: 170 },       // og1-Raum11 (graues Areal als Raum)
-  },
-  "2. Stock": {
-    "1": { x: 445.5, y: 82.5, width: 231, height: 165 },   // og2-Raum1
-    "2": { x: 391.5, y: 252.5, width: 210, height: 165 },   // og2-Raum2
-    "3": { x: 219.5, y: 82.5, width: 222, height: 165 },    // og2-Raum3
-    "4": { x: 811.5, y: 82.5, width: 222, height: 165 },    // og2-Raum4
-    "5": { x: 1030.5, y: 82.5, width: 222, height: 165 },   // og2-Raum5
-    "6": { x: 169.5, y: 252.5, width: 222, height: 165 },   // og2-Raum6
-    "7": { x: 1361.5, y: 252.5, width: 154, height: 165 },  // og2-Raum7
-    "8": { x: 1652.5, y: 82.5, width: 154, height: 165 },   // og2-Raum8
-    "9": { x: 1434.5, y: 82.5, width: 213, height: 165 },   // og2-Raum9
-    "10": { x: 1520.5, y: 252.5, width: 185, height: 165 },  // og2-Raum10
-  },
-  "3. Stock": {
-    "1": { x: 1361.5, y: 252.5, width: 179, height: 165 },  // og3-Raum1
-    "2": { x: 1631.5, y: 82.5, width: 175, height: 165 },   // og3-Raum2
-    "3": { x: 1425.5, y: 82.5, width: 201, height: 165 },   // og3-Raum3
-    "4": { x: 1544.5, y: 252.5, width: 161, height: 165 },  // og3-Raum4
-    "5": { x: 970.5, y: 252.5, width: 222, height: 165 },   // og3-Raum5
-    "6": { x: 731.5, y: 252.5, width: 234, height: 165 },   // og3-Raum6
-    "7": { x: 873.5, y: 82.5, width: 379, height: 165 },    // og3-Raum7
-    "8": { x: 218.5, y: 82.5, width: 222, height: 165 },    // og3-Raum8
-    "9": { x: 391.5, y: 252.5, width: 205, height: 165 },   // og3-Raum9
-    "10": { x: 169.5, y: 252.5, width: 222, height: 165 },  // og3-Raum10
-    "11": { x: 445.5, y: 82.5, width: 222, height: 165 },   // og3-Raum11
-    "12": { x: 1707.5, y: 252.5, width: 84, height: 89 },   // og3-Raum12
-    "13": { x: 1197.5, y: 246.5, width: 55, height: 80 },   // og3-Raum13
-    "14": { x: 601.5, y: 246.5, width: 66, height: 80 },    // og3-Raum14
-    "15": { x: 777.5, y: 82.5, width: 94, height: 165 },    // og3-Raum15
-  },
-  "4. Stock": {
-    "1": { x: 169.5, y: 252.5, width: 125, height: 165 }, // og4-Raum1
-    "2": { x: 458.5, y: 252.5, width: 138, height: 165 }, // og4-Raum2
-    "3": { x: 299.5, y: 252.5, width: 154, height: 165 }, // og4-Raum3
-    "4": { x: 445.5, y: 82.5, width: 222, height: 165 },  // og4-Raum4
-    "5": { x: 218.5, y: 82.5, width: 222, height: 165 },  // og4-Raum5
-    "6": { x: 958.5, y: 252.5, width: 234, height: 165 }, // og4-Raum6
-    "7": { x: 731.5, y: 252.5, width: 222, height: 165 }, // og4-Raum7
-    "8": { x: 1018.5, y: 82.5, width: 234, height: 165 }, // og4-Raum8
-    "9": { x: 777.5, y: 82.5, width: 234, height: 165 },  // og4-Raum9
-    "10": { x: 1634.5, y: 82.5, width: 172, height: 165 },// og4-Raum10
-    "11": { x: 1425.5, y: 82.5, width: 204, height: 165 },// og4-Raum11
-    "12": { x: 1361.5, y: 252.5, width: 232, height: 165 },// og4-Raum12
-    "13": { x: 1738.5, y: 252.5, width: 68, height: 80 },  // og4-Raum13
-    "14": { x: 1197.5, y: 250.5, width: 55, height: 80 },  // og4-Raum14
-    "15": { x: 601.5, y: 250.5, width: 66, height: 80 },   // og4-Raum15
-    "16": { x: 1598.5, y: 252.5, width: 135, height: 165 } // og4-Raum16
-  },
-  "5. Stock": {
-    "1": { x: 763.5, y: 82.5, width: 236, height: 165 },   // og5-Raum1
-    "2": { x: 1620.5, y: 82.5, width: 172, height: 165 },   // og5-Raum2
-    "3": { x: 1411.5, y: 82.5, width: 204, height: 165 },   // og5-Raum5
-    "4": { x: 1002.5, y: 82.5, width: 236, height: 165 },   // og5-Raum8
-    "5": { x: 444.5, y: 82.5, width: 209, height: 165 },    // og5-Raum9
-    "6": { x: 204.5, y: 82.5, width: 236, height: 165 },    // og5-Raum12
-    "7": { x: 1347.5, y: 252.5, width: 180, height: 165 },  // og5-Raum3
-    "8": { x: 1532.5, y: 252.5, width: 187, height: 165 },  // og5-Raum4
-    "9": { x: 958.5, y: 252.5, width: 220, height: 165 },   // og5-Raum6
-    "10": { x: 717.5, y: 252.5, width: 236, height: 165 },  // og5-Raum7
-    "11": { x: 396.5, y: 252.5, width: 186, height: 165 },  // og5-Raum10
-    "12": { x: 155.5, y: 252.5, width: 236, height: 165 },  // og5-Raum11
-    "13": { x: 587.5, y: 250.5, width: 66, height: 80 },    // og5-Raum13
-    "14": { x: 1180.5, y: 250.5, width: 58, height: 80 },   // og5-Raum14
-    "15": { x: 1724.5, y: 252.5, width: 68, height: 80 }    // og5-Raum15
-  },
-};
+export const roomPositions: Readonly<
+  Record<string, Readonly<Record<string, { x: number; y: number; width: number; height: number }>>>
+> = Object.freeze({
+  EG: Object.freeze({
+    "1": { x: 219.5, y: 82.5, width: 222, height: 165 },
+    "2": { x: 811.5, y: 82.5, width: 203, height: 165 },
+    "3": { x: 1425.5, y: 82.5, width: 369, height: 165 },
+    "4": { x: 1019.5, y: 82.5, width: 244, height: 165 },
+    "5": { x: 436.5, y: 82.5, width: 240, height: 165 },
+    "6": { x: 760.5, y: 252.5, width: 431, height: 165 },
+    "7": { x: 1710.5, y: 252.5, width: 84, height: 89 },
+    "8": { x: 1347.5, y: 252.5, width: 358, height: 165 },
+    "9": { x: 400.5, y: 252.5, width: 222, height: 165 },
+    "10": { x: 169.5, y: 252.5, width: 226, height: 165 },
+  }),
+  "1. Stock": Object.freeze({
+    "1": { x: 219.5, y: 82.5, width: 235, height: 165 },
+    "2": { x: 811.5, y: 82.5, width: 222, height: 165 },
+    "3": { x: 459.5, y: 82.5, width: 217, height: 165 },
+    "4": { x: 1615.5, y: 82.5, width: 179, height: 165 },
+    "5": { x: 1425.5, y: 82.5, width: 185, height: 165 },
+    "6": { x: 1038.5, y: 82.5, width: 225, height: 165 },
+    "7": { x: 1361.5, y: 252.5, width: 154, height: 165 },
+    "8": { x: 1520.5, y: 252.5, width: 185, height: 165 },
+    "9": { x: 1707.5, y: 252.5, width: 84, height: 89 },
+    "10": { x: 100, y: 250, width: 525, height: 170 },
+    "11": { x: 758, y: 250, width: 436, height: 170 },
+  }),
+  "2. Stock": Object.freeze({
+    "1": { x: 445.5, y: 82.5, width: 231, height: 165 },
+    "2": { x: 391.5, y: 252.5, width: 210, height: 165 },
+    "3": { x: 219.5, y: 82.5, width: 222, height: 165 },
+    "4": { x: 811.5, y: 82.5, width: 222, height: 165 },
+    "5": { x: 1030.5, y: 82.5, width: 222, height: 165 },
+    "6": { x: 169.5, y: 252.5, width: 222, height: 165 },
+    "7": { x: 1361.5, y: 252.5, width: 154, height: 165 },
+    "8": { x: 1652.5, y: 82.5, width: 154, height: 165 },
+    "9": { x: 1434.5, y: 82.5, width: 213, height: 165 },
+    "10": { x: 1520.5, y: 252.5, width: 185, height: 165 },
+  }),
+  "3. Stock": Object.freeze({
+    "1": { x: 1361.5, y: 252.5, width: 179, height: 165 },
+    "2": { x: 1631.5, y: 82.5, width: 175, height: 165 },
+    "3": { x: 1425.5, y: 82.5, width: 201, height: 165 },
+    "4": { x: 1544.5, y: 252.5, width: 161, height: 165 },
+    "5": { x: 970.5, y: 252.5, width: 222, height: 165 },
+    "6": { x: 731.5, y: 252.5, width: 234, height: 165 },
+    "7": { x: 873.5, y: 82.5, width: 379, height: 165 },
+    "8": { x: 218.5, y: 82.5, width: 222, height: 165 },
+    "9": { x: 391.5, y: 252.5, width: 205, height: 165 },
+    "10": { x: 169.5, y: 252.5, width: 222, height: 165 },
+    "11": { x: 445.5, y: 82.5, width: 222, height: 165 },
+    "12": { x: 1707.5, y: 252.5, width: 84, height: 89 },
+    "13": { x: 1197.5, y: 246.5, width: 55, height: 80 },
+    "14": { x: 601.5, y: 246.5, width: 66, height: 80 },
+    "15": { x: 777.5, y: 82.5, width: 94, height: 165 },
+  }),
+  "4. Stock": Object.freeze({
+    "1": { x: 169.5, y: 252.5, width: 125, height: 165 },
+    "2": { x: 458.5, y: 252.5, width: 138, height: 165 },
+    "3": { x: 299.5, y: 252.5, width: 154, height: 165 },
+    "4": { x: 445.5, y: 82.5, width: 222, height: 165 },
+    "5": { x: 218.5, y: 82.5, width: 222, height: 165 },
+    "6": { x: 958.5, y: 252.5, width: 234, height: 165 },
+    "7": { x: 731.5, y: 252.5, width: 222, height: 165 },
+    "8": { x: 1018.5, y: 82.5, width: 234, height: 165 },
+    "9": { x: 777.5, y: 82.5, width: 234, height: 165 },
+    "10": { x: 1634.5, y: 82.5, width: 172, height: 165 },
+    "11": { x: 1425.5, y: 82.5, width: 204, height: 165 },
+    "12": { x: 1361.5, y: 252.5, width: 232, height: 165 },
+    "13": { x: 1738.5, y: 252.5, width: 68, height: 80 },
+    "14": { x: 1197.5, y: 250.5, width: 55, height: 80 },
+    "15": { x: 601.5, y: 250.5, width: 66, height: 80 },
+    "16": { x: 1598.5, y: 252.5, width: 135, height: 165 },
+  }),
+  "5. Stock": Object.freeze({
+    "1": { x: 763.5, y: 82.5, width: 236, height: 165 },
+    "2": { x: 1620.5, y: 82.5, width: 172, height: 165 },
+    "3": { x: 1411.5, y: 82.5, width: 204, height: 165 },
+    "4": { x: 1002.5, y: 82.5, width: 236, height: 165 },
+    "5": { x: 444.5, y: 82.5, width: 209, height: 165 },
+    "6": { x: 204.5, y: 82.5, width: 236, height: 165 },
+    "7": { x: 1347.5, y: 252.5, width: 180, height: 165 },
+    "8": { x: 1532.5, y: 252.5, width: 187, height: 165 },
+    "9": { x: 958.5, y: 252.5, width: 220, height: 165 },
+    "10": { x: 717.5, y: 252.5, width: 236, height: 165 },
+    "11": { x: 396.5, y: 252.5, width: 186, height: 165 },
+    "12": { x: 155.5, y: 252.5, width: 236, height: 165 },
+    "13": { x: 587.5, y: 250.5, width: 66, height: 80 },
+    "14": { x: 1180.5, y: 250.5, width: 58, height: 80 },
+    "15": { x: 1724.5, y: 252.5, width: 68, height: 80 },
+  }),
+});
 
 
-// ---------------------
-// OccupancyOverlay Component (mit API-Call)
-// ---------------------
-const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
+// ----- OccupancyOverlay Component (with numeric room linking) -----
+interface OccupancyOverlayProps {
+  floor: string;
+  onRoomClick?: (roomId: number) => void;
+}
+
+const OccupancyOverlay: React.FC<OccupancyOverlayProps> = ({ floor, onRoomClick }) => {
   const [occupancyData, setOccupancyData] = useState<{ RoomId: number; Occupancy: number }[]>([]);
 
   useEffect(() => {
-    // Passe hier den API-Endpunkt an
-    fetch(`http://your-backend-url/api/occupancy?floor=${encodeURIComponent(floor)}`)
+    fetch(`http://localhost:5000/api/occupancy?floor=${encodeURIComponent(floor)}`)
       .then(response => response.json())
       .then(data => setOccupancyData(data))
       .catch(error => console.error("Error fetching occupancy data:", error));
   }, [floor]);
 
-  // Wähle das passende Mapping für die aktuelle Etage
+  // Retrieve the mapping for the current floor from the exported roomPositions object
   const positions = roomPositions[floor];
 
   return (
     <>
       {occupancyData.map((data) => {
-        const pos = positions ? positions[data.RoomId.toString()] : undefined;
+        // Convert the RoomId to a string to match the keys in roomPositions
+        const roomKey = String(data.RoomId);
+        const pos = positions ? positions[roomKey] : undefined;
         if (!pos) return null;
         return (
           <rect
@@ -1331,6 +1555,8 @@ const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
             width={pos.width}
             height={pos.height}
             fill={getRoomColor(data.Occupancy)}
+            onClick={() => onRoomClick && onRoomClick(data.RoomId)}
+            style={{ cursor: onRoomClick ? "pointer" : "default" }}
           />
         );
       })}
@@ -1339,9 +1565,9 @@ const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
 };
 
 function getRoomColor(occupancy: number): string {
-  if (occupancy < 33) return "rgba(0,255,0,0.4)";    // Grün
-  if (occupancy < 66) return "rgba(255,255,0,0.4)";    // Gelb
-  return "rgba(255,0,0,0.4)";                           // Rot
+  if (occupancy < 33) return "rgba(0,255,0,0.4)"; // Green
+  if (occupancy < 66) return "rgba(255,255,0,0.4)"; // Yellow
+  return "rgba(255,0,0,0.4)";                         // Red
 }
 
 // ---------------------
@@ -1458,23 +1684,40 @@ const InteractiveFloorPlan: React.FC = () => {
 // UserView Component
 // ---------------------
 const UserView: React.FC = () => {
+  const urls = [
+    "http://localhost:5173/display", // URL für "Auslastung Martinsberg"
+    "http://localhost:5173/display",    // URL für "Auslastung Bruggerstrasse"
+    "http://localhost:5173/display"      // URL für "Kombinierte Auslastung"
+  ];
+
+  const handleCopy = (url: string) => {
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        console.log("URL kopiert:", url);
+        // Optional: Feedback an den User, z.B. mittels eines Toasts
+      })
+      .catch(err => {
+        console.error("Fehler beim Kopieren:", err);
+      });
+  };
+
   return (
-    <div className="min-h-screen w-full pt-28 pb-20 px-8 bg-gradient-to-br from-white via-mint-50 to-indigo-100">
+    <div className="min-h-screen w-full pt-28 pb-20 px-8 bg-gradient-to-br from-white via-mint-50 to-orange-100">
       <div className="text-center mb-14">
-        <h1 className="text-6xl font-bold mb-4 text-indigo-800 drop-shadow-md">
-          Willkommen bei Lernplatz+
+        <h1 className="text-6xl font-bold mb-4 text-orange-800 drop-shadow-md">
+          Willkommen bei SpotFree
         </h1>
         <p className="text-2xl text-gray-600">
           Finde deinen perfekten Arbeitsplatz – schnell, smart und immer aktuell.
         </p>
       </div>
-      <div className="flex flex-row justify-center items-stretch gap-10">
+      <div className="flex flex-row justify-center items-stretch gap-10 mb-10">
         <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl">
-          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Interaktiver Grundriss</h2>
+          <h2 className="text-2xl font-semibold text-orange-700 mb-4">Interaktiver Grundriss</h2>
           <InteractiveFloorPlan />
         </div>
         <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl text-center flex flex-col gap-4">
-          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">
+          <h2 className="text-2xl font-semibold text-orange-700 mb-4">
             Live Auslastung anzeigen
           </h2>
           <p className="text-gray-600 text-base max-w-xs mx-auto">
@@ -1482,7 +1725,10 @@ const UserView: React.FC = () => {
           </p>
           {["URL kopieren", "URL kopieren", "URL kopieren"].map((btn, i) => (
             <div key={i} className="space-y-1">
-              <button className="w-44 bg-indigo-600 text-white py-2 rounded-full hover:bg-indigo-700 transition font-medium shadow-md text-base">
+              <button
+                onClick={() => handleCopy(urls[i])}
+                className="w-44 bg-orange-600 text-white py-2 rounded-full hover:bg-orange-700 transition font-medium shadow-md text-base"
+              >
                 {btn}
               </button>
               <p className="text-sm text-gray-500">
@@ -1495,19 +1741,21 @@ const UserView: React.FC = () => {
             </div>
           ))}
         </div>
+      </div>
+      <div className="flex flex-row justify-center items-stretch gap-10">
         <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl">
-          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Info & Über Uns</h2>
+          <h2 className="text-2xl font-semibold text-orange-700 mb-4">Info & Über Uns</h2>
           <div className="text-gray-700 text-base space-y-3">
             <p>
               <strong>Systemerklärung:</strong> Unser smartes System misst kontinuierlich die verbundenen Geräte der Accesspoints, die in den Gebäuden verteilt sind. Dadurch ermitteln wir in Echtzeit, wo gerade viel los ist – und du findest blitzschnell den freien Arbeitsplatz in der BBB.
             </p>
             <p>
               <strong>Über uns:</strong> Wir, Keanu Koelewijn, Julius Burlet, Alberto Manser, Enis Shorra & Yen Sauliak, haben dieses innovative Projekt mit Unterstützung der BBBaden im Hackathon 2025 "Baden Hackt" realisiert. Entdecke mehr auf unserem{' '}
-              <a href="https://github.com/halva2251/BBB-Leitsystem/tree/main" className="text-indigo-600 underline">
+              <a href="https://github.com/halva2251/BBB-Leitsystem/tree/main" className="text-orange-600 underline">
                 Github
               </a>{' '}
               oder besuche die{' '}
-              <a href="https://www.badnpm install --save-dev @types/react-router-domen-hackt.ch" className="text-indigo-600 underline">
+              <a href="https://www.badnpm install --save-dev @types/react-router-domen-hackt.ch" className="text-orange-600 underline">
                 Webseite Baden Hackt 2025
               </a>.
             </p>
