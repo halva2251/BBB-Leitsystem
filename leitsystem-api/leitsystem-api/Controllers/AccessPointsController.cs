@@ -118,7 +118,50 @@ namespace leitsystem_api.Controllers
 
             return CreatedAtAction(nameof(GetAccessPoint), new { id = accessPoint.Id }, resultDto);
         }
+        // PUT: api/AccessPoints/MyAccessPointName
+        [HttpPut("{name}")]
+        public async Task<IActionResult> UpdateAccessPointByName(string name, AccessPointUpdateDTO dto)
+        {
+            // Find AccessPoint by Name
+            var accessPoint = await _context.AccessPoints
+                .FirstOrDefaultAsync(ap => ap.Name == name);
 
+            if (accessPoint == null)
+            {
+                return NotFound($"Access Point with name '{name}' not found.");
+            }
+
+            // Update properties
+            accessPoint.Name = dto.Name;
+            accessPoint.MAC = dto.MAC;
+            accessPoint.IPAddress = dto.IPAddress;
+            accessPoint.Description = dto.Description;
+            accessPoint.ConnectedDevices = dto.ConnectedDevices;
+            accessPoint.Group = dto.Group;
+            accessPoint.Status = dto.Status;
+            accessPoint.Model = dto.Model;
+            accessPoint.SWVersion = dto.SWVersion;
+            accessPoint.Channel = dto.Channel;
+            accessPoint.Band = dto.Band;
+            accessPoint.Uptime = dto.Uptime;
+
+            // Mark entity as modified
+            _context.Entry(accessPoint).State = EntityState.Modified;
+
+            try
+            {
+                // Save the updates
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // You may want additional concurrency checks here.
+                // If the name is truly unique, this generally won't re-fetch multiple matches.
+                throw;
+            }
+
+            return NoContent();
+        }
         // PUT: api/AccessPoints/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAccessPoint(int id, AccessPointUpdateDTO dto)
