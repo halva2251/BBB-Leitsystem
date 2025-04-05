@@ -1,7 +1,11 @@
 // App.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { UncontrolledReactSVGPanZoom } from 'react-svg-pan-zoom';
 
+// ---------------------
+// Header Component
+// ---------------------
 const Header: React.FC = () => {
   return (
     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-8 py-5 bg-white/70 backdrop-blur-md shadow-lg z-50 border-b border-gray-200">
@@ -16,6 +20,9 @@ const Header: React.FC = () => {
   );
 };
 
+// ---------------------
+// Footer Component
+// ---------------------
 const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-white py-4 fixed bottom-0 w-full">
@@ -40,12 +47,15 @@ const Footer: React.FC = () => {
   );
 };
 
+// ---------------------
+// LoginPage Component (Dummy-Implementierung)
+// ---------------------
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt");
+    console.log("Dummy Login - Navigiere zum Admin Dashboard");
     navigate('/admin');
   };
 
@@ -62,7 +72,6 @@ const LoginPage: React.FC = () => {
             <input
               type="email"
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
-              required
             />
           </div>
           <div>
@@ -70,7 +79,6 @@ const LoginPage: React.FC = () => {
             <input
               type="password"
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
-              required
             />
           </div>
           <button
@@ -85,74 +93,262 @@ const LoginPage: React.FC = () => {
   );
 };
 
+// ---------------------
+// AdminDashboard Component
+// ---------------------
+interface AccessPoint {
+  id: number;
+  name: string;
+  room: string;
+  position: string;
+}
+
 const AdminDashboard: React.FC = () => {
+  const [accessPoints, setAccessPoints] = useState<AccessPoint[]>([
+    { id: 1, name: 'AP 1', room: 'Raum 101', position: 'EG' },
+    { id: 2, name: 'AP 2', room: 'Raum 202', position: '1. Stock' },
+  ]);
+  const [selectedAP, setSelectedAP] = useState<AccessPoint | null>(accessPoints[0] || null);
+  const [editName, setEditName] = useState(selectedAP?.name || '');
+  const [editRoom, setEditRoom] = useState(selectedAP?.room || '');
+  const [editPosition, setEditPosition] = useState(selectedAP?.position || '');
+
+  const handleSelectAP = (ap: AccessPoint) => {
+    setSelectedAP(ap);
+    setEditName(ap.name);
+    setEditRoom(ap.room);
+    setEditPosition(ap.position);
+  };
+
+  const handleAddAP = () => {
+    const newAP: AccessPoint = {
+      id: Date.now(),
+      name: 'Neuer AP',
+      room: 'Raum X',
+      position: 'EG',
+    };
+    const newList = [...accessPoints, newAP];
+    setAccessPoints(newList);
+    handleSelectAP(newAP);
+  };
+
+  const handleDeleteAP = () => {
+    if (!selectedAP) return;
+    const filtered = accessPoints.filter((ap) => ap.id !== selectedAP.id);
+    setAccessPoints(filtered);
+    if (filtered.length > 0) {
+      handleSelectAP(filtered[0]);
+    } else {
+      setSelectedAP(null);
+      setEditName('');
+      setEditRoom('');
+      setEditPosition('');
+    }
+  };
+
+  const handleSaveChanges = () => {
+    if (!selectedAP) return;
+    const updatedList = accessPoints.map((ap) =>
+      ap.id === selectedAP.id
+        ? { ...ap, name: editName, room: editRoom, position: editPosition }
+        : ap
+    );
+    setAccessPoints(updatedList);
+    setSelectedAP({ ...selectedAP, name: editName, room: editRoom, position: editPosition });
+  };
+
   return (
     <div className="min-h-screen w-full p-10 pt-32 pb-20 bg-gradient-to-br from-white via-blue-50 to-green-50 text-gray-800">
       <h1 className="text-4xl font-extrabold mb-6 text-indigo-800">Admin Dashboard</h1>
-      <p className="text-xl">
-        Verwalte Accesspoints und Live-Belegungsdaten zentral an einem Ort.
-      </p>
+      <div className="flex gap-6">
+        {/* Linke Spalte: Accesspoint-Liste */}
+        <div className="w-1/3 bg-white p-6 shadow-lg rounded-lg flex flex-col">
+          <h2 className="text-2xl font-bold mb-4">Accesspoints</h2>
+          <div className="flex-1 overflow-y-auto space-y-2">
+            {accessPoints.map((ap) => (
+              <div
+                key={ap.id}
+                onClick={() => handleSelectAP(ap)}
+                className={`p-3 rounded-md cursor-pointer hover:bg-gray-100 ${
+                  selectedAP && selectedAP.id === ap.id ? 'bg-indigo-50' : ''
+                }`}
+              >
+                <p className="font-semibold">{ap.name}</p>
+                <p className="text-sm text-gray-600">{ap.room}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex justify-between">
+            <button
+              onClick={handleAddAP}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+            >
+              +
+            </button>
+            <button
+              onClick={handleDeleteAP}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+              disabled={!selectedAP}
+            >
+              -
+            </button>
+          </div>
+        </div>
+        {/* Rechte Spalte: Detailansicht */}
+        <div className="w-2/3 bg-white p-6 shadow-lg rounded-lg">
+          {selectedAP ? (
+            <>
+              <h2 className="text-2xl font-bold mb-4">Raum: {selectedAP.room}</h2>
+              <div className="w-full h-48 bg-gray-200 rounded-md flex items-center justify-center mb-6">
+                <p className="text-gray-500">Raumplan/Bild hier einfügen</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2 text-base"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">
+                    Raum
+                  </label>
+                  <input
+                    type="text"
+                    value={editRoom}
+                    onChange={(e) => setEditRoom(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2 text-base"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">
+                    Position
+                  </label>
+                  <input
+                    type="text"
+                    value={editPosition}
+                    onChange={(e) => setEditPosition(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2 text-base"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleSaveChanges}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+              >
+                Änderungen speichern
+              </button>
+            </>
+          ) : (
+            <p className="text-lg text-gray-600">
+              Wähle links einen Accesspoint oder füge einen neuen hinzu.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
+// ---------------------
+// InteractiveFloorPlan Component (mit Dictionary für File-Paths und Zoom-Container mit Hintergrund #1E1E1E)
+// ---------------------
 const InteractiveFloorPlan: React.FC = () => {
-  const [selectedBuilding, setSelectedBuilding] = useState("Martinsberg");
-  const [selectedFloor, setSelectedFloor] = useState("EG");
+  const [selectedBuilding, setSelectedBuilding] = useState<keyof typeof floorPaths>("Bruggerstrasse");
+  const [selectedFloor, setSelectedFloor] = useState<keyof typeof floorPaths["Bruggerstrasse"]>("EG");
 
-  // Beide Gebäude haben 6 Stockwerke: EG und 1.–5. Stock
-  const floors = ["EG", "1", "2", "3", "4", "5"];
+  // Definierte Stockwerke – keys müssen exakt mit den Dictionary-Einträgen übereinstimmen
+  const floors = ["EG", "1. Stock", "2. Stock", "3. Stock", "4. Stock", "5. Stock"];
+
+  // Dictionary: Gebäude -> Stockwerk -> kompletter File-Path zum SVG (Dateien liegen im public-Ordner)
+  const floorPaths: Record<string, Record<string, string>> = {
+    Bruggerstrasse: {
+      "EG": "../public/assets/Bruggerstrasse/B_EG.svg",
+      "1. Stock": "../public/assets/Bruggerstrasse/B_1.svg",
+      "2. Stock": "../public/assets/Bruggerstrasse/B_2.svg",
+      "3. Stock": "../public/assets/Bruggerstrasse/B_3.svg",
+      "4. Stock": "../public/assets/Bruggerstrasse/B_4.svg",
+      "5. Stock": "../public/assets/Bruggerstrasse/B_5.svg",
+    },
+  };
+
+  const selectedFile = floorPaths[selectedBuilding][selectedFloor];
+
+  // Ref für den SVG-Pan/Zoom-Viewer
+  const ViewerRef = useRef<any>(null);
+
+  // Nach dem Rendern: Automatisches "Fit to Viewer"
+  useEffect(() => {
+    if (ViewerRef.current) {
+      setTimeout(() => {
+        ViewerRef.current.fitToViewer();
+      }, 50);
+    }
+  }, [selectedFile]);
 
   return (
-    <div>
-      {/* Relative Container für die Karte mit Zoom-Overlay */}
-      <div className="relative w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center shadow-inner">
-        <p className="text-xl text-gray-600">Karte hier einfügen</p>
-        {/* Zoom-Controls als Overlay */}
-        <div className="absolute top-2 right-2 flex flex-col space-y-2">
-          <button className="w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center text-xl font-bold hover:bg-gray-100">
-            +
-          </button>
-          <button className="w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center text-xl font-bold hover:bg-gray-100">
-            -
-          </button>
-        </div>
-      </div>
-      {/* Navigation unter der Karte */}
-      <div className="mt-4 flex flex-row gap-4 justify-center">
+    <div className="p-4">
+      {/* Auswahl der Gebäude und Stockwerke */}
+      <div className="flex flex-row gap-4 justify-center">
         <div>
           <label className="block text-base font-semibold text-gray-700">Gebäude</label>
           <select
             value={selectedBuilding}
             onChange={(e) => {
-              setSelectedBuilding(e.target.value);
-              setSelectedFloor("EG"); // ggf. Floor zurücksetzen
+              setSelectedBuilding(e.target.value as keyof typeof floorPaths);
+              setSelectedFloor("EG");
             }}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-base text-black"
+            className="mt-1 block p-2 border border-gray-300 rounded-md text-base text-black"
           >
-            <option value="Martinsberg">Martinsberg</option>
-            <option value="Bruggerstrasse">Bruggerstrasse</option>
+            {Object.keys(floorPaths).map((building) => (
+              <option key={building} value={building}>
+                {building}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="block text-base font-semibold text-gray-700">Stockwerk</label>
           <select
             value={selectedFloor}
-            onChange={(e) => setSelectedFloor(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-base text-black"
+            onChange={(e) => setSelectedFloor(e.target.value as keyof typeof floorPaths["Bruggerstrasse"])}
+            className="mt-1 block p-2 border border-gray-300 rounded-md text-base text-black"
           >
             {floors.map((floor) => (
               <option key={floor} value={floor}>
-                {floor === "EG" ? "Erdgeschoss" : `${floor}. Stock`}
+                {floor}
               </option>
             ))}
           </select>
         </div>
       </div>
+
+      {/* Anzeige der SVG-Karte in einem Zoom-Container */}
+      <div className="mt-4 border border-gray-300 rounded-lg">
+        <UncontrolledReactSVGPanZoom
+          width={800}
+          height={600}
+          tool="auto"
+          background="#1E1E1E" // Zoom-Container-Hintergrund auf #1E1E1E gesetzt
+          ref={ViewerRef}
+        >
+          <svg width="1970" height="500" viewBox="0 0 1970 500">
+            <image href={selectedFile} width="1970" height="500" />
+          </svg>
+        </UncontrolledReactSVGPanZoom>
+      </div>
     </div>
   );
 };
 
+// ---------------------
+// UserView Component
+// ---------------------
 const UserView: React.FC = () => {
   return (
     <div className="min-h-screen w-full pt-28 pb-20 px-8 bg-gradient-to-br from-white via-mint-50 to-indigo-100">
@@ -164,15 +360,11 @@ const UserView: React.FC = () => {
           Finde deinen perfekten Arbeitsplatz – schnell, smart und immer aktuell.
         </p>
       </div>
-
       <div className="flex flex-row justify-center items-stretch gap-10">
-        {/* Panel: Interaktiver Grundriss */}
         <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl">
           <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Interaktiver Grundriss</h2>
           <InteractiveFloorPlan />
         </div>
-
-        {/* Panel: Live-Auslastung */}
         <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl text-center flex flex-col gap-6 items-center justify-center">
           <p className="text-gray-600 text-base max-w-xs">
             Mit nur einem Klick erhältst du die aktuelle Auslastung deiner Wunschbereiche – bleib immer up-to-date.
@@ -192,8 +384,6 @@ const UserView: React.FC = () => {
             </div>
           ))}
         </div>
-
-        {/* Panel: Info & Über Uns */}
         <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl">
           <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Info & Über Uns</h2>
           <div className="text-gray-700 text-base space-y-3">
@@ -217,20 +407,41 @@ const UserView: React.FC = () => {
   );
 };
 
+//-------------------
+//fullscreen Display
+//-------------------
+
+const floors = ["EG", "1. Stock", "2. Stock", "3. Stock", "4. Stock", "5. Stock"]
+
+// Display-Komponente, die auf Vollbild läuft
+const DisplayView: React.FC = () => {
+  const [currentFloorIndex, setCurrentFloorIndex] = useState(0)
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentFloorIndex((prev) => (prev + 1) % floors.length)
+    }, 5000)
+    return () => clearInterval(intervalId)
+  }, [])
+
+  return (
+    <div className="w-screen h-screen flex items-center justify-center bg-black">
+      <h1 className="text-white text-8xl">{floors[currentFloorIndex]}</h1>
+    </div>
+  )
+}
+// App-Komponente mit Routing
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen w-screen overflow-x-hidden font-sans pb-20">
-      <BrowserRouter>
-        <Header />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/display" element={<DisplayView />} />
+        <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/" element={<UserView />} />
-        </Routes>
-        <Footer />
-      </BrowserRouter>
-    </div>
-  );
-};
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
 export default App;
