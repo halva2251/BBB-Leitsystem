@@ -436,12 +436,12 @@ const InteractiveFloorPlan: React.FC = () => {
     },
     "Martinsberg": {
       /*
-      "EG": "/assets/GebäudeB/B_EG.svg",
-      "1. Stock": "/assets/GebäudeB/B_1.svg",
-      "2. Stock": "/assets/GebäudeB/B_2.svg",
-      "3. Stock": "/assets/GebäudeB/B_3.svg",
-      "4. Stock": "/assets/GebäudeB/B_4.svg",
-      "5. Stock": "/assets/GebäudeB/B_5.svg",
+      "EG": "/assets/Martinsberg/M_EG.svg",
+      "1. Stock": "/assets/Martinsberg/M_1.svg",
+      "2. Stock": "/assets/Martinsberg/M_2.svg",
+      "3. Stock": "/assets/Martinsberg/M_3.svg",
+      "4. Stock": "/assets/Martinsberg/M_4.svg",
+      "5. Stock": "/assets/Martinsberg/M_5.svg",
       */
     },
   };
