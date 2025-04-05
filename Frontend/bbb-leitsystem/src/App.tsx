@@ -52,7 +52,6 @@ const Footer: React.FC = () => {
 // ---------------------
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Dummy Login - Navigiere zum Admin Dashboard");
@@ -94,10 +93,11 @@ const LoginPage: React.FC = () => {
 };
 
 // ---------------------
-// AdminDashboard Component
+// AdminDashboard Component (dynamisches Accesspoint-Management)
 // ---------------------
 interface AccessPoint {
   id: number;
+  roomId: number;
   name: string;
   room: string;
   position: string;
@@ -105,16 +105,18 @@ interface AccessPoint {
 
 const AdminDashboard: React.FC = () => {
   const [accessPoints, setAccessPoints] = useState<AccessPoint[]>([
-    { id: 1, name: 'AP 1', room: 'Raum 101', position: 'EG' },
-    { id: 2, name: 'AP 2', room: 'Raum 202', position: '1. Stock' },
+    { id: 1, roomId: 101, name: 'AP 1', room: 'Raum 101', position: 'EG' },
+    { id: 2, roomId: 102, name: 'AP 2', room: 'Raum 202', position: '1. Stock' },
   ]);
   const [selectedAP, setSelectedAP] = useState<AccessPoint | null>(accessPoints[0] || null);
+  const [editRoomId, setEditRoomId] = useState(selectedAP?.roomId.toString() || '');
   const [editName, setEditName] = useState(selectedAP?.name || '');
   const [editRoom, setEditRoom] = useState(selectedAP?.room || '');
   const [editPosition, setEditPosition] = useState(selectedAP?.position || '');
 
   const handleSelectAP = (ap: AccessPoint) => {
     setSelectedAP(ap);
+    setEditRoomId(ap.roomId.toString());
     setEditName(ap.name);
     setEditRoom(ap.room);
     setEditPosition(ap.position);
@@ -123,6 +125,7 @@ const AdminDashboard: React.FC = () => {
   const handleAddAP = () => {
     const newAP: AccessPoint = {
       id: Date.now(),
+      roomId: 0, // Standardwert, anpassbar
       name: 'Neuer AP',
       room: 'Raum X',
       position: 'EG',
@@ -140,6 +143,7 @@ const AdminDashboard: React.FC = () => {
       handleSelectAP(filtered[0]);
     } else {
       setSelectedAP(null);
+      setEditRoomId('');
       setEditName('');
       setEditRoom('');
       setEditPosition('');
@@ -148,13 +152,18 @@ const AdminDashboard: React.FC = () => {
 
   const handleSaveChanges = () => {
     if (!selectedAP) return;
+    const updatedAP: AccessPoint = {
+      ...selectedAP,
+      roomId: parseInt(editRoomId, 10),
+      name: editName,
+      room: editRoom,
+      position: editPosition,
+    };
     const updatedList = accessPoints.map((ap) =>
-      ap.id === selectedAP.id
-        ? { ...ap, name: editName, room: editRoom, position: editPosition }
-        : ap
+      ap.id === selectedAP.id ? updatedAP : ap
     );
     setAccessPoints(updatedList);
-    setSelectedAP({ ...selectedAP, name: editName, room: editRoom, position: editPosition });
+    setSelectedAP(updatedAP);
   };
 
   return (
@@ -174,7 +183,9 @@ const AdminDashboard: React.FC = () => {
                 }`}
               >
                 <p className="font-semibold">{ap.name}</p>
-                <p className="text-sm text-gray-600">{ap.room}</p>
+                <p className="text-sm text-gray-600">
+                  Room ID: {ap.roomId} | {ap.room}
+                </p>
               </div>
             ))}
           </div>
@@ -203,6 +214,17 @@ const AdminDashboard: React.FC = () => {
                 <p className="text-gray-500">Raumplan/Bild hier einfügen</p>
               </div>
               <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">
+                    Room ID
+                  </label>
+                  <input
+                    type="number"
+                    value={editRoomId}
+                    onChange={(e) => setEditRoomId(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2 text-base"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1 text-gray-700">
                     Name
@@ -256,34 +278,183 @@ const AdminDashboard: React.FC = () => {
 };
 
 // ---------------------
-// InteractiveFloorPlan Component (mit Dictionary für File-Paths und Zoom-Container mit Hintergrund #1E1E1E)
+// Room Position Mapping (nach Etagen) – momentan leer, bitte ergänze selbst!
+export const roomPositions: Record<
+  string,
+  Record<string, { x: number; y: number; width: number; height: number }>
+> = {
+  EG: {
+    // Werte aus B_EG
+    "1": { x: 219.5, y: 82.5, width: 222, height: 165 },  // eg-Raum1
+    "2": { x: 811.5, y: 82.5, width: 203, height: 165 },  // eg-Raum2
+    "3": { x: 1425.5, y: 82.5, width: 369, height: 165 }, // eg-Raum3
+    "4": { x: 1019.5, y: 82.5, width: 244, height: 165 }, // eg-Raum4
+    "5": { x: 436.5, y: 82.5, width: 240, height: 165 },  // eg-Raum5
+    "6": { x: 760.5, y: 252.5, width: 431, height: 165 }, // eg-Raum6
+    "7": { x: 1710.5, y: 252.5, width: 84, height: 89 },  // eg-Raum7
+    "8": { x: 1347.5, y: 252.5, width: 358, height: 165 },// eg-Raum8
+    "9": { x: 400.5, y: 252.5, width: 222, height: 165 }, // eg-Raum9
+    "10": { x: 169.5, y: 252.5, width: 226, height: 165 },// eg-Raum10
+  },
+  "1. Stock": {
+    // Werte aus B_1
+    "1": { x: 219.5, y: 82.5, width: 235, height: 165 },  // og1-Raum1
+    "2": { x: 811.5, y: 82.5, width: 222, height: 165 },  // og1-Raum2
+    "3": { x: 459.5, y: 82.5, width: 217, height: 165 },  // og1-Raum3
+    "4": { x: 1615.5, y: 82.5, width: 179, height: 165 }, // og1-Raum4
+    "5": { x: 1425.5, y: 82.5, width: 185, height: 165 }, // og1-Raum5
+    "6": { x: 1038.5, y: 82.5, width: 225, height: 165 }, // og1-Raum8
+    "7": { x: 1361.5, y: 252.5, width: 154, height: 165 }, // og1-Raum6
+    "8": { x: 1520.5, y: 252.5, width: 185, height: 165 }, // og1-Raum7
+    "9": { x: 1707.5, y: 252.5, width: 84, height: 89 },   // og1-Raum9
+    "10": { x: 100, y: 250, width: 525, height: 170 },       // og1-Raum10 (graues Areal als Raum)
+    "11": { x: 758, y: 250, width: 436, height: 170 },       // og1-Raum11 (graues Areal als Raum)
+  },
+  "2. Stock": {
+    "1": { x: 445.5, y: 82.5, width: 231, height: 165 },   // og2-Raum1
+    "2": { x: 391.5, y: 252.5, width: 210, height: 165 },   // og2-Raum2
+    "3": { x: 219.5, y: 82.5, width: 222, height: 165 },    // og2-Raum3
+    "4": { x: 811.5, y: 82.5, width: 222, height: 165 },    // og2-Raum4
+    "5": { x: 1030.5, y: 82.5, width: 222, height: 165 },   // og2-Raum5
+    "6": { x: 169.5, y: 252.5, width: 222, height: 165 },   // og2-Raum6
+    "7": { x: 1361.5, y: 252.5, width: 154, height: 165 },  // og2-Raum7
+    "8": { x: 1652.5, y: 82.5, width: 154, height: 165 },   // og2-Raum8
+    "9": { x: 1434.5, y: 82.5, width: 213, height: 165 },   // og2-Raum9
+    "10": { x: 1520.5, y: 252.5, width: 185, height: 165 },  // og2-Raum10
+  },
+  "3. Stock": {
+    "1": { x: 1361.5, y: 252.5, width: 179, height: 165 },  // og3-Raum1
+    "2": { x: 1631.5, y: 82.5, width: 175, height: 165 },   // og3-Raum2
+    "3": { x: 1425.5, y: 82.5, width: 201, height: 165 },   // og3-Raum3
+    "4": { x: 1544.5, y: 252.5, width: 161, height: 165 },  // og3-Raum4
+    "5": { x: 970.5, y: 252.5, width: 222, height: 165 },   // og3-Raum5
+    "6": { x: 731.5, y: 252.5, width: 234, height: 165 },   // og3-Raum6
+    "7": { x: 873.5, y: 82.5, width: 379, height: 165 },    // og3-Raum7
+    "8": { x: 218.5, y: 82.5, width: 222, height: 165 },    // og3-Raum8
+    "9": { x: 391.5, y: 252.5, width: 205, height: 165 },   // og3-Raum9
+    "10": { x: 169.5, y: 252.5, width: 222, height: 165 },  // og3-Raum10
+    "11": { x: 445.5, y: 82.5, width: 222, height: 165 },   // og3-Raum11
+    "12": { x: 1707.5, y: 252.5, width: 84, height: 89 },   // og3-Raum12
+    "13": { x: 1197.5, y: 246.5, width: 55, height: 80 },   // og3-Raum13
+    "14": { x: 601.5, y: 246.5, width: 66, height: 80 },    // og3-Raum14
+    "15": { x: 777.5, y: 82.5, width: 94, height: 165 },    // og3-Raum15
+  },
+  "4. Stock": {
+    "1": { x: 169.5, y: 252.5, width: 125, height: 165 }, // og4-Raum1
+    "2": { x: 458.5, y: 252.5, width: 138, height: 165 }, // og4-Raum2
+    "3": { x: 299.5, y: 252.5, width: 154, height: 165 }, // og4-Raum3
+    "4": { x: 445.5, y: 82.5, width: 222, height: 165 },  // og4-Raum4
+    "5": { x: 218.5, y: 82.5, width: 222, height: 165 },  // og4-Raum5
+    "6": { x: 958.5, y: 252.5, width: 234, height: 165 }, // og4-Raum6
+    "7": { x: 731.5, y: 252.5, width: 222, height: 165 }, // og4-Raum7
+    "8": { x: 1018.5, y: 82.5, width: 234, height: 165 }, // og4-Raum8
+    "9": { x: 777.5, y: 82.5, width: 234, height: 165 },  // og4-Raum9
+    "10": { x: 1634.5, y: 82.5, width: 172, height: 165 },// og4-Raum10
+    "11": { x: 1425.5, y: 82.5, width: 204, height: 165 },// og4-Raum11
+    "12": { x: 1361.5, y: 252.5, width: 232, height: 165 },// og4-Raum12
+    "13": { x: 1738.5, y: 252.5, width: 68, height: 80 },  // og4-Raum13
+    "14": { x: 1197.5, y: 250.5, width: 55, height: 80 },  // og4-Raum14
+    "15": { x: 601.5, y: 250.5, width: 66, height: 80 },   // og4-Raum15
+    "16": { x: 1598.5, y: 252.5, width: 135, height: 165 } // og4-Raum16
+  },
+  "5. Stock": {
+    "1": { x: 763.5, y: 82.5, width: 236, height: 165 },   // og5-Raum1
+    "2": { x: 1620.5, y: 82.5, width: 172, height: 165 },   // og5-Raum2
+    "3": { x: 1411.5, y: 82.5, width: 204, height: 165 },   // og5-Raum5
+    "4": { x: 1002.5, y: 82.5, width: 236, height: 165 },   // og5-Raum8
+    "5": { x: 444.5, y: 82.5, width: 209, height: 165 },    // og5-Raum9
+    "6": { x: 204.5, y: 82.5, width: 236, height: 165 },    // og5-Raum12
+    "7": { x: 1347.5, y: 252.5, width: 180, height: 165 },  // og5-Raum3
+    "8": { x: 1532.5, y: 252.5, width: 187, height: 165 },  // og5-Raum4
+    "9": { x: 958.5, y: 252.5, width: 220, height: 165 },   // og5-Raum6
+    "10": { x: 717.5, y: 252.5, width: 236, height: 165 },  // og5-Raum7
+    "11": { x: 396.5, y: 252.5, width: 186, height: 165 },  // og5-Raum10
+    "12": { x: 155.5, y: 252.5, width: 236, height: 165 },  // og5-Raum11
+    "13": { x: 587.5, y: 250.5, width: 66, height: 80 },    // og5-Raum13
+    "14": { x: 1180.5, y: 250.5, width: 58, height: 80 },   // og5-Raum14
+    "15": { x: 1724.5, y: 252.5, width: 68, height: 80 }    // og5-Raum15
+  },
+};
+
+
+// ---------------------
+// OccupancyOverlay Component (mit API-Call)
+// ---------------------
+const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
+  const [occupancyData, setOccupancyData] = useState<{ RoomId: number; Occupancy: number }[]>([]);
+
+  useEffect(() => {
+    // Passe hier den API-Endpunkt an
+    fetch(`http://your-backend-url/api/occupancy?floor=${encodeURIComponent(floor)}`)
+      .then(response => response.json())
+      .then(data => setOccupancyData(data))
+      .catch(error => console.error("Error fetching occupancy data:", error));
+  }, [floor]);
+
+  // Wähle das passende Mapping für die aktuelle Etage
+  const positions = roomPositions[floor];
+
+  return (
+    <>
+      {occupancyData.map((data) => {
+        const pos = positions ? positions[data.RoomId.toString()] : undefined;
+        if (!pos) return null;
+        return (
+          <rect
+            key={data.RoomId}
+            x={pos.x}
+            y={pos.y}
+            width={pos.width}
+            height={pos.height}
+            fill={getRoomColor(data.Occupancy)}
+          />
+        );
+      })}
+    </>
+  );
+};
+
+function getRoomColor(occupancy: number): string {
+  if (occupancy < 33) return "rgba(0,255,0,0.4)";    // Grün
+  if (occupancy < 66) return "rgba(255,255,0,0.4)";    // Gelb
+  return "rgba(255,0,0,0.4)";                           // Rot
+}
+
+// ---------------------
+// InteractiveFloorPlan Component (für alle Stockwerke)
 // ---------------------
 const InteractiveFloorPlan: React.FC = () => {
-  const [selectedBuilding, setSelectedBuilding] = useState<keyof typeof floorPaths>("Bruggerstrasse");
-  const [selectedFloor, setSelectedFloor] = useState<keyof typeof floorPaths["Bruggerstrasse"]>("EG");
-
-  // Definierte Stockwerke – keys müssen exakt mit den Dictionary-Einträgen übereinstimmen
-  const floors = ["EG", "1. Stock", "2. Stock", "3. Stock", "4. Stock", "5. Stock"];
-
-  // Dictionary: Gebäude -> Stockwerk -> kompletter File-Path zum SVG (Dateien liegen im public-Ordner)
+  // Dictionary: Gebäude -> Stockwerk -> SVG-Pfad
   const floorPaths: Record<string, Record<string, string>> = {
-    Bruggerstrasse: {
-      "EG": "../public/assets/Bruggerstrasse/B_EG.svg",
-      "1. Stock": "../public/assets/Bruggerstrasse/B_1.svg",
-      "2. Stock": "../public/assets/Bruggerstrasse/B_2.svg",
-      "3. Stock": "../public/assets/Bruggerstrasse/B_3.svg",
-      "4. Stock": "../public/assets/Bruggerstrasse/B_4.svg",
-      "5. Stock": "../public/assets/Bruggerstrasse/B_5.svg",
+    "Bruggerstrasse": {
+      "EG": "/assets/Bruggerstrasse/B_EG.svg",
+      "1. Stock": "/assets/Bruggerstrasse/B_1.svg",
+      "2. Stock": "/assets/Bruggerstrasse/B_2.svg",
+      "3. Stock": "/assets/Bruggerstrasse/B_3.svg",
+      "4. Stock": "/assets/Bruggerstrasse/B_4.svg",
+      "5. Stock": "/assets/Bruggerstrasse/B_5.svg",
+    },
+    "Martinsberg": {
+      /*
+      "EG": "/assets/GebäudeB/B_EG.svg",
+      "1. Stock": "/assets/GebäudeB/B_1.svg",
+      "2. Stock": "/assets/GebäudeB/B_2.svg",
+      "3. Stock": "/assets/GebäudeB/B_3.svg",
+      "4. Stock": "/assets/GebäudeB/B_4.svg",
+      "5. Stock": "/assets/GebäudeB/B_5.svg",
+      */
     },
   };
 
+  const buildings = Object.keys(floorPaths);
+  const floors = ["EG", "1. Stock", "2. Stock", "3. Stock", "4. Stock", "5. Stock"];
+  const [selectedBuilding, setSelectedBuilding] = React.useState<string>(buildings[0]);
+  const [selectedFloor, setSelectedFloor] = React.useState<string>("EG");
+
   const selectedFile = floorPaths[selectedBuilding][selectedFloor];
 
-  // Ref für den SVG-Pan/Zoom-Viewer
-  const ViewerRef = useRef<any>(null);
-
-  // Nach dem Rendern: Automatisches "Fit to Viewer"
-  useEffect(() => {
+  const ViewerRef = React.useRef<any>(null);
+  React.useEffect(() => {
     if (ViewerRef.current) {
       setTimeout(() => {
         ViewerRef.current.fitToViewer();
@@ -293,19 +464,18 @@ const InteractiveFloorPlan: React.FC = () => {
 
   return (
     <div className="p-4">
-      {/* Auswahl der Gebäude und Stockwerke */}
       <div className="flex flex-row gap-4 justify-center">
         <div>
           <label className="block text-base font-semibold text-gray-700">Gebäude</label>
           <select
             value={selectedBuilding}
             onChange={(e) => {
-              setSelectedBuilding(e.target.value as keyof typeof floorPaths);
+              setSelectedBuilding(e.target.value);
               setSelectedFloor("EG");
             }}
             className="mt-1 block p-2 border border-gray-300 rounded-md text-base text-black"
           >
-            {Object.keys(floorPaths).map((building) => (
+            {buildings.map((building) => (
               <option key={building} value={building}>
                 {building}
               </option>
@@ -316,7 +486,7 @@ const InteractiveFloorPlan: React.FC = () => {
           <label className="block text-base font-semibold text-gray-700">Stockwerk</label>
           <select
             value={selectedFloor}
-            onChange={(e) => setSelectedFloor(e.target.value as keyof typeof floorPaths["Bruggerstrasse"])}
+            onChange={(e) => setSelectedFloor(e.target.value)}
             className="mt-1 block p-2 border border-gray-300 rounded-md text-base text-black"
           >
             {floors.map((floor) => (
@@ -327,14 +497,12 @@ const InteractiveFloorPlan: React.FC = () => {
           </select>
         </div>
       </div>
-
-      {/* Anzeige der SVG-Karte in einem Zoom-Container */}
-      <div className="mt-4 border border-gray-300 rounded-lg">
+      <div className="relative mt-4 border border-gray-300 rounded-lg">
         <UncontrolledReactSVGPanZoom
           width={800}
           height={600}
           tool="auto"
-          background="#1E1E1E" // Zoom-Container-Hintergrund auf #1E1E1E gesetzt
+          background="#1E1E1E"
           ref={ViewerRef}
         >
           <svg width="1970" height="500" viewBox="0 0 1970 500">
@@ -342,9 +510,25 @@ const InteractiveFloorPlan: React.FC = () => {
           </svg>
         </UncontrolledReactSVGPanZoom>
       </div>
+      {/* Legende */}
+      <div className="mt-4 flex justify-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-green-500" />
+          <span className="text-base text-gray-700">Wenig Auslastung</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-yellow-500" />
+          <span className="text-base text-gray-700">Mässig Auslastung</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-6 bg-red-500" />
+          <span className="text-base text-gray-700">Hohe Auslastung</span>
+        </div>
+      </div>
     </div>
   );
 };
+
 
 // ---------------------
 // UserView Component
@@ -365,8 +549,11 @@ const UserView: React.FC = () => {
           <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Interaktiver Grundriss</h2>
           <InteractiveFloorPlan />
         </div>
-        <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl text-center flex flex-col gap-6 items-center justify-center">
-          <p className="text-gray-600 text-base max-w-xs">
+        <div className="flex-1 bg-white/80 backdrop-blur-lg p-6 rounded-2xl shadow-xl text-center flex flex-col gap-4">
+          <h2 className="text-2xl font-semibold text-indigo-700 mb-4">
+            Live Auslastung anzeigen
+          </h2>
+          <p className="text-gray-600 text-base max-w-xs mx-auto">
             Mit nur einem Klick erhältst du die aktuelle Auslastung deiner Wunschbereiche – bleib immer up-to-date.
           </p>
           {["URL kopieren", "URL kopieren", "URL kopieren"].map((btn, i) => (
@@ -408,40 +595,69 @@ const UserView: React.FC = () => {
 };
 
 //-------------------
-//fullscreen Display
+// Fullscreen Display
 //-------------------
+const FullscreenFloorplan: React.FC = () => {
+  // Dictionary: Gebäude -> Stockwerk -> kompletter File-Path zum SVG (Dateien liegen im public-Ordner)
+  const floorPaths: Record<string, Record<string, string>> = {
+    Bruggerstrasse: {
+      "EG": "/assets/Bruggerstrasse/B_EG.svg",
+      "1. Stock": "/assets/Bruggerstrasse/B_1.svg",
+      "2. Stock": "/assets/Bruggerstrasse/B_2.svg",
+      "3. Stock": "/assets/Bruggerstrasse/B_3.svg",
+      "4. Stock": "/assets/Bruggerstrasse/B_4.svg",
+      "5. Stock": "/assets/Bruggerstrasse/B_5.svg",
+    },
+  };
 
-const floors = ["EG", "1. Stock", "2. Stock", "3. Stock", "4. Stock", "5. Stock"]
+  const selectedBuilding = "Bruggerstrasse";
+  const floors = ["EG", "1. Stock", "2. Stock", "3. Stock", "4. Stock", "5. Stock"];
+  const [currentFloorIndex, setCurrentFloorIndex] = useState(0);
+  const currentFloor = floors[currentFloorIndex];
 
-// Display-Komponente, die auf Vollbild läuft
-const DisplayView: React.FC = () => {
-  const [currentFloorIndex, setCurrentFloorIndex] = useState(0)
+  // Hole den File-Pfad aus dem Dictionary basierend auf dem aktuellen Stockwerk
+  const selectedFile = floorPaths[selectedBuilding][currentFloor];
 
+  // Automatischer Wechsel alle 5 Sekunden
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setCurrentFloorIndex((prev) => (prev + 1) % floors.length)
-    }, 5000)
-    return () => clearInterval(intervalId)
-  }, [])
+      setCurrentFloorIndex(prev => (prev + 1) % floors.length);
+    }, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-black">
-      <h1 className="text-white text-8xl">{floors[currentFloorIndex]}</h1>
+    <div className="w-screen h-screen bg-gray-900 flex flex-col items-center justify-center">
+      <div className="text-white text-4xl mb-4">
+        {selectedBuilding} – {currentFloor}
+      </div>
+      <div className="w-full h-full flex items-center justify-center">
+        <img 
+          src={selectedFile}
+          alt={`Floorplan ${currentFloor}`}
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
     </div>
-  )
+  );
 }
-// App-Komponente mit Routing
+
+// ---------------------
+// Main App Component mit Routing
+// ---------------------
 const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
-        <Route path="/display" element={<DisplayView />} />
+        <Route path="/display" element={<FullscreenFloorplan />} />
         <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/" element={<UserView />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/" element={<UserView />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
-  )
-}
+  );
+};
 
 export default App;
