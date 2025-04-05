@@ -48,21 +48,39 @@ const Footer: React.FC = () => {
 };
 
 // ---------------------
-// LoginPage Component (Dummy-Implementierung)
+// LoginPage Component (ohne Header/Footer, full width & zentriert)
 // ---------------------
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Dummy Login - Navigiere zum Admin Dashboard");
-    navigate('/admin');
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        console.log("Login erfolgreich – Navigiere zum Admin Dashboard");
+        navigate('/admin');
+      } else {
+        console.error("Login fehlgeschlagen");
+      }
+    } catch (error) {
+      console.error("Fehler beim Login:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center pt-32 pb-20 bg-gradient-to-br from-white to-blue-50">
+    // Verwende w-screen und h-screen, damit der Container die volle Breite/Höhe hat
+    <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-br from-white to-blue-50">
+      {/* Entferne max-w, damit das Formular die volle Breite einnimmt */}
       <form
         onSubmit={handleLogin}
-        className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full max-w-lg"
+        className="bg-white/90 backdrop-blur-lg p-10 rounded-3xl shadow-2xl w-full"
       >
         <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">Admin Login</h2>
         <div className="space-y-4">
@@ -70,6 +88,8 @@ const LoginPage: React.FC = () => {
             <label className="block text-base font-semibold text-gray-600">Email</label>
             <input
               type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
             />
           </div>
@@ -77,6 +97,8 @@ const LoginPage: React.FC = () => {
             <label className="block text-base font-semibold text-gray-600">Password</label>
             <input
               type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-base"
             />
           </div>
@@ -93,98 +115,166 @@ const LoginPage: React.FC = () => {
 };
 
 // ---------------------
-// AdminDashboard Component (dynamisches Accesspoint-Management)
+// AdminDashboard Component (AccessPoint-Management)
 // ---------------------
+// Dieses Beispiel basiert auf dem Backend-Schema für AccessPointDto, AccessPointCreateDTO und AccessPointUpdateDTO
 interface AccessPoint {
   id: number;
-  roomId: number;
-  name: string;
-  room: string;
-  position: string;
+  name: string | null;
+  mac: string | null;
+  ipAddress: string | null;
+  description: string | null;
+  connectedDevices: number;
+  group: string | null;
+  status: string | null;
+  model: string | null;
+  swVersion: string | null;
+  channel: string | null;
+  band: string | null;
+  uptime: string | null;
 }
 
 const AdminDashboard: React.FC = () => {
-  const [accessPoints, setAccessPoints] = useState<AccessPoint[]>([
-    { id: 1, roomId: 101, name: 'AP 1', room: 'Raum 101', position: 'EG' },
-    { id: 2, roomId: 102, name: 'AP 2', room: 'Raum 202', position: '1. Stock' },
-  ]);
-  const [selectedAP, setSelectedAP] = useState<AccessPoint | null>(accessPoints[0] || null);
-  const [editRoomId, setEditRoomId] = useState(selectedAP?.roomId.toString() || '');
-  const [editName, setEditName] = useState(selectedAP?.name || '');
-  const [editRoom, setEditRoom] = useState(selectedAP?.room || '');
-  const [editPosition, setEditPosition] = useState(selectedAP?.position || '');
+  const [accessPoints, setAccessPoints] = useState<AccessPoint[]>([]);
+  const [selectedAP, setSelectedAP] = useState<AccessPoint | null>(null);
+  // Beispielhafte Felder zum Bearbeiten
+  const [editName, setEditName] = useState<string>('');
+  const [editIp, setEditIp] = useState<string>('');
+  const [editStatus, setEditStatus] = useState<string>('');
+
+  // Beim Mounten die AccessPoints vom Backend laden
+  useEffect(() => {
+    fetch('http://localhost:5000/api/AccessPoints')
+      .then(response => response.json())
+      .then((data: AccessPoint[]) => {
+        setAccessPoints(data);
+        if (data.length > 0) {
+          handleSelectAP(data[0]);
+        }
+      })
+      .catch(error => console.error("Fehler beim Laden der AccessPoints:", error));
+  }, []);
 
   const handleSelectAP = (ap: AccessPoint) => {
     setSelectedAP(ap);
-    setEditRoomId(ap.roomId.toString());
-    setEditName(ap.name);
-    setEditRoom(ap.room);
-    setEditPosition(ap.position);
+    setEditName(ap.name || '');
+    setEditIp(ap.ipAddress || '');
+    setEditStatus(ap.status || '');
   };
 
-  const handleAddAP = () => {
-    const newAP: AccessPoint = {
-      id: Date.now(),
-      roomId: 0, // Standardwert, anpassbar
-      name: 'Neuer AP',
-      room: 'Raum X',
-      position: 'EG',
+  const handleAddAP = async () => {
+    // Beispielhafte Daten für einen neuen AccessPoint
+    const newAPData = {
+      name: "Neuer AccessPoint",
+      mac: "",
+      ipAddress: "",
+      description: "",
+      connectedDevices: 0,
+      group: "",
+      status: "inactive",
+      model: "",
+      swVersion: "",
+      channel: "",
+      band: "",
+      uptime: ""
     };
-    const newList = [...accessPoints, newAP];
-    setAccessPoints(newList);
-    handleSelectAP(newAP);
-  };
-
-  const handleDeleteAP = () => {
-    if (!selectedAP) return;
-    const filtered = accessPoints.filter((ap) => ap.id !== selectedAP.id);
-    setAccessPoints(filtered);
-    if (filtered.length > 0) {
-      handleSelectAP(filtered[0]);
-    } else {
-      setSelectedAP(null);
-      setEditRoomId('');
-      setEditName('');
-      setEditRoom('');
-      setEditPosition('');
+    try {
+      const response = await fetch('http://localhost:5000/api/AccessPoints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAPData)
+      });
+      if (response.ok) {
+        const createdAP: AccessPoint = await response.json();
+        const newList = [...accessPoints, createdAP];
+        setAccessPoints(newList);
+        handleSelectAP(createdAP);
+      } else {
+        console.error("Fehler beim Hinzufügen des AccessPoints");
+      }
+    } catch (error) {
+      console.error("Fehler beim Hinzufügen des AccessPoints:", error);
     }
   };
 
-  const handleSaveChanges = () => {
+  const handleDeleteAP = async () => {
     if (!selectedAP) return;
-    const updatedAP: AccessPoint = {
-      ...selectedAP,
-      roomId: parseInt(editRoomId, 10),
+    try {
+      const response = await fetch(`http://localhost:5000/api/AccessPoints/${selectedAP.id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        const filtered = accessPoints.filter(ap => ap.id !== selectedAP.id);
+        setAccessPoints(filtered);
+        if (filtered.length > 0) {
+          handleSelectAP(filtered[0]);
+        } else {
+          setSelectedAP(null);
+          setEditName('');
+          setEditIp('');
+          setEditStatus('');
+        }
+      } else {
+        console.error("Fehler beim Löschen des AccessPoints");
+      }
+    } catch (error) {
+      console.error("Fehler beim Löschen des AccessPoints:", error);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!selectedAP) return;
+    const updatedAPData = {
       name: editName,
-      room: editRoom,
-      position: editPosition,
+      mac: selectedAP.mac,
+      ipAddress: editIp,
+      description: selectedAP.description,
+      connectedDevices: selectedAP.connectedDevices,
+      group: selectedAP.group,
+      status: editStatus,
+      model: selectedAP.model,
+      swVersion: selectedAP.swVersion,
+      channel: selectedAP.channel,
+      band: selectedAP.band,
+      uptime: selectedAP.uptime,
     };
-    const updatedList = accessPoints.map((ap) =>
-      ap.id === selectedAP.id ? updatedAP : ap
-    );
-    setAccessPoints(updatedList);
-    setSelectedAP(updatedAP);
+    try {
+      const response = await fetch(`http://localhost:5000/api/AccessPoints/${selectedAP.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedAPData)
+      });
+      if (response.ok) {
+        const updatedList = accessPoints.map(ap =>
+          ap.id === selectedAP.id ? { ...ap, ...updatedAPData } : ap
+        );
+        setAccessPoints(updatedList);
+        setSelectedAP({ ...selectedAP, ...updatedAPData });
+      } else {
+        console.error("Fehler beim Aktualisieren des AccessPoints");
+      }
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren des AccessPoints:", error);
+    }
   };
 
   return (
     <div className="min-h-screen w-full p-10 pt-32 pb-20 bg-gradient-to-br from-white via-blue-50 to-green-50 text-gray-800">
       <h1 className="text-4xl font-extrabold mb-6 text-indigo-800">Admin Dashboard</h1>
       <div className="flex gap-6">
-        {/* Linke Spalte: Accesspoint-Liste */}
+        {/* Linke Spalte: AccessPoint-Liste */}
         <div className="w-1/3 bg-white p-6 shadow-lg rounded-lg flex flex-col">
-          <h2 className="text-2xl font-bold mb-4">Accesspoints</h2>
+          <h2 className="text-2xl font-bold mb-4">AccessPoints</h2>
           <div className="flex-1 overflow-y-auto space-y-2">
-            {accessPoints.map((ap) => (
+            {accessPoints.map(ap => (
               <div
                 key={ap.id}
                 onClick={() => handleSelectAP(ap)}
-                className={`p-3 rounded-md cursor-pointer hover:bg-gray-100 ${
-                  selectedAP && selectedAP.id === ap.id ? 'bg-indigo-50' : ''
-                }`}
+                className={`p-3 rounded-md cursor-pointer hover:bg-gray-100 ${selectedAP && selectedAP.id === ap.id ? 'bg-indigo-50' : ''}`}
               >
                 <p className="font-semibold">{ap.name}</p>
                 <p className="text-sm text-gray-600">
-                  Room ID: {ap.roomId} | {ap.room}
+                  IP: {ap.ipAddress || 'Nicht gesetzt'} | Status: {ap.status || 'n/a'}
                 </p>
               </div>
             ))}
@@ -209,52 +299,32 @@ const AdminDashboard: React.FC = () => {
         <div className="w-2/3 bg-white p-6 shadow-lg rounded-lg">
           {selectedAP ? (
             <>
-              <h2 className="text-2xl font-bold mb-4">Raum: {selectedAP.room}</h2>
-              <div className="w-full h-48 bg-gray-200 rounded-md flex items-center justify-center mb-6">
-                <p className="text-gray-500">Raumplan/Bild hier einfügen</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <h2 className="text-2xl font-bold mb-4">AccessPoint: {selectedAP.name}</h2>
+              <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">
-                    Room ID
-                  </label>
-                  <input
-                    type="number"
-                    value={editRoomId}
-                    onChange={(e) => setEditRoomId(e.target.value)}
-                    className="w-full border border-gray-300 rounded-md p-2 text-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">
-                    Name
-                  </label>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">Name</label>
                   <input
                     type="text"
                     value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
+                    onChange={e => setEditName(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2 text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">
-                    Raum
-                  </label>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">IP Address</label>
                   <input
                     type="text"
-                    value={editRoom}
-                    onChange={(e) => setEditRoom(e.target.value)}
+                    value={editIp}
+                    onChange={e => setEditIp(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2 text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">
-                    Position
-                  </label>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700">Status</label>
                   <input
                     type="text"
-                    value={editPosition}
-                    onChange={(e) => setEditPosition(e.target.value)}
+                    value={editStatus}
+                    onChange={e => setEditStatus(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2 text-base"
                   />
                 </div>
@@ -268,7 +338,7 @@ const AdminDashboard: React.FC = () => {
             </>
           ) : (
             <p className="text-lg text-gray-600">
-              Wähle links einen Accesspoint oder füge einen neuen hinzu.
+              Wähle links einen AccessPoint oder füge einen neuen hinzu.
             </p>
           )}
         </div>
@@ -378,25 +448,48 @@ export const roomPositions: Record<
 
 
 // ---------------------
-// OccupancyOverlay Component (mit API-Call)
+// OccupancyOverlay Component (Berechnung der Raumauslastung mit vorhandenen Endpoints)
 // ---------------------
+interface OccupancyData {
+  RoomId: number;
+  Occupancy: number;
+}
+
 const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
-  const [occupancyData, setOccupancyData] = useState<{ RoomId: number; Occupancy: number }[]>([]);
+  const [occupancyData, setOccupancyData] = useState<OccupancyData[]>([]);
 
   useEffect(() => {
-    // Passe hier den API-Endpunkt an
-    fetch(`http://your-backend-url/api/occupancy?floor=${encodeURIComponent(floor)}`)
-      .then(response => response.json())
-      .then(data => setOccupancyData(data))
+    // Parallel alle benötigten Daten abrufen
+    Promise.all([
+      fetch('http://localhost:5000/api/Rooms').then(res => res.json()),
+      fetch('http://localhost:5000/api/RoomAccessPoints').then(res => res.json()),
+      fetch('http://localhost:5000/api/AccessPoints').then(res => res.json())
+    ])
+      .then(([rooms, roomAccessPoints, accessPoints]) => {
+        // Filtere Räume, die dem gewünschten Stockwerk entsprechen
+        const roomsOnFloor = rooms.filter((room: any) => room.floorName === floor);
+        // Berechne für jeden Raum die Auslastung
+        const computedOccupancy = roomsOnFloor.map((room: any) => {
+          // Finde alle Zuordnungen für diesen Raum
+          const mappings = roomAccessPoints.filter((map: any) => map.roomId === room.id);
+          // Summe die connectedDevices der zugeordneten AccessPoints
+          const occupancy = mappings.reduce((sum: number, map: any) => {
+            const ap = accessPoints.find((a: any) => a.id === map.accesspointId);
+            return sum + (ap ? ap.connectedDevices : 0);
+          }, 0);
+          return { RoomId: room.id, Occupancy: occupancy };
+        });
+        setOccupancyData(computedOccupancy);
+      })
       .catch(error => console.error("Error fetching occupancy data:", error));
   }, [floor]);
 
-  // Wähle das passende Mapping für die aktuelle Etage
+  // roomPositions sollte wie gehabt definiert sein (Mapping: Stockwerk -> Raum-ID -> Position)
   const positions = roomPositions[floor];
 
   return (
     <>
-      {occupancyData.map((data) => {
+      {occupancyData.map(data => {
         const pos = positions ? positions[data.RoomId.toString()] : undefined;
         if (!pos) return null;
         return (
@@ -415,10 +508,11 @@ const OccupancyOverlay: React.FC<{ floor: string }> = ({ floor }) => {
 };
 
 function getRoomColor(occupancy: number): string {
-  if (occupancy < 33) return "rgba(0,255,0,0.4)";    // Grün
-  if (occupancy < 66) return "rgba(255,255,0,0.4)";    // Gelb
-  return "rgba(255,0,0,0.4)";                           // Rot
+  if (occupancy < 33) return "rgba(0,255,0,0.4)";   // Grün
+  if (occupancy < 66) return "rgba(255,255,0,0.4)";   // Gelb
+  return "rgba(255,0,0,0.4)";                          // Rot
 }
+
 
 // ---------------------
 // InteractiveFloorPlan Component (für alle Stockwerke)
